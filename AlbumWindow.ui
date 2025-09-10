@@ -1,0 +1,1012 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>AlbumWindow</class>
+ <widget class="QMainWindow" name="AlbumWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>991</width>
+    <height>980</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>AlbumWindow</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">AlbumWindow {
+    /* 背景色 */
+    background-color:rgb(46,47,48);
+}
+/* 垂直滚动条整体 */
+QScrollBar:vertical {
+    border: none;
+    background-color:black;
+    width: 8px;                /* 滚动条宽度 */
+    margin: 0px;
+    border-radius: 4px;
+}
+
+/* 垂直滑块 */
+QScrollBar::handle:vertical {
+    background: white;
+    min-height: 20px;
+    border-radius: 4px;
+}
+QScrollBar::handle:vertical:hover {
+    background: #888888;
+}
+QScrollBar::handle:vertical:pressed {
+    background: #555555;
+}
+
+/* 上下箭头去掉 */
+QScrollBar::add-line:vertical,
+QScrollBar::sub-line:vertical {
+    height: 0px;
+}
+
+/* 横向滚动条整体 */
+QScrollBar:horizontal {
+    border: none;
+    background: #444;
+    height: 8px;
+    margin: 0px;
+    border-radius: 4px;
+}
+
+/* 横向滑块 */
+QScrollBar::handle:horizontal {
+    background: #b0b0b0;
+    min-width: 20px;
+    border-radius: 4px;
+}
+QScrollBar::handle:horizontal:hover {
+    background: #888888;
+}
+QScrollBar::handle:horizontal:pressed {
+    background: #555555;
+}
+
+/* 左右箭头去掉 */
+QScrollBar::add-line:horizontal,
+QScrollBar::sub-line:horizontal {
+    width: 0px;
+}</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout_3">
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,0,0,0,0,0,0,0,0,0,0,0">
+      <property name="spacing">
+       <number>2</number>
+      </property>
+      <property name="sizeConstraint">
+       <enum>QLayout::SetFixedSize</enum>
+      </property>
+      <item>
+       <widget class="QPushButton" name="homeButton">
+        <property name="text">
+         <string>Home</string>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>16</width>
+          <height>16</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="backButton">
+        <property name="text">
+         <string>返回</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="list_hide">
+        <property name="text">
+         <string>隐藏列表</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="album_open">
+        <property name="text">
+         <string>打开相册</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="album_add">
+        <property name="text">
+         <string>创建相册</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QLabel" name="pix_name">
+        <property name="styleSheet">
+         <string notr="true">color:rgb(255, 255, 255)</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_3">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QPushButton" name="min_btn">
+        <property name="maximumSize">
+         <size>
+          <width>32</width>
+          <height>28</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>-</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="win_btn">
+        <property name="maximumSize">
+         <size>
+          <width>32</width>
+          <height>28</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>口</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="off_btn">
+        <property name="maximumSize">
+         <size>
+          <width>32</width>
+          <height>32</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>X</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="0,4,0">
+      <item>
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <item>
+         <widget class="QListView" name="listView">
+          <property name="styleSheet">
+           <string notr="true">QListView {
+    background-color: rgb(101, 101, 101);
+    color: white;
+    font: 12px &quot;Microsoft YaHei&quot;;
+}
+
+QListView::item {
+    padding: 5px;
+}
+
+QListView::item:selected {
+    background-color: rgb(255,170,0);
+    color: white;
+}
+
+QListView::item:hover {
+    background-color: #e6f2ff;
+    color: #1E90FF;
+}
+QListView::item:focus {
+    border: none;
+    outline: 0;
+}
+QListView::item:selected:focus {
+    border: none;
+}
+</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="QWidget" name="imageContainer" native="true">
+        <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="0,0">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="ImageView" name="graphicsView">
+           <property name="styleSheet">
+            <string notr="true">background-color: rgb(101, 101, 101);
+/* 隐藏垂直滚动条 */
+QListView::verticalScrollBar {
+    width: 0px;
+}
+
+/* 隐藏水平滚动条 */
+QListView::horizontalScrollBar {
+    height: 0px;
+}</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <layout class="QVBoxLayout" name="verticalLayout_2"/>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <widget class="QWidget" name="info_widget" native="true">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>200</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>400</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">background-color: rgb(101, 101, 101);
+color:rgb(255, 255, 255)</string>
+        </property>
+        <layout class="QGridLayout" name="gridLayout" rowstretch="3,1,1,1,1,0,1,0,1">
+         <property name="verticalSpacing">
+          <number>20</number>
+         </property>
+         <item row="5" column="1">
+          <widget class="QLabel" name="label_info">
+           <property name="text">
+            <string>大小信息</string>
+           </property>
+          </widget>
+         </item>
+         <item row="6" column="1">
+          <widget class="QLabel" name="label_msg">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">/* QLabel 深色风格 */
+QLabel {
+    color: #FFFFFF;                          /* 文字颜色 */
+    font: 13px &quot;Microsoft YaHei&quot;;
+    background: transparent;                 /* 一般 label 不需要背景 */
+    padding: 4px 6px;
+}
+
+/* 如果你希望 label 有类似输入框的外观，可以用这个 */
+QLabel[frameShape=&quot;1&quot;] { /* QFrame::Box */
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 rgba(255,255,255,0.02),
+                                stop:1 rgba(255,255,255,0.01));
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 6px;
+    padding: 6px 10px;
+}
+</string>
+           </property>
+           <property name="text">
+            <string>（信息）</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="label_name_image">
+           <property name="text">
+            <string>name:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="7" column="0">
+          <widget class="QLabel" name="label_road_image">
+           <property name="text">
+            <string>路径：</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QLineEdit" name="lineEdit_name">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>40</height>
+            </size>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">/* 精美 QLineEdit 样式（暗色主题可直接改色值） */
+/* 用法：ui-&gt;lineEdit-&gt;setStyleSheet(QStringLiteral(&lt;the stylesheet&gt;)); */
+
+QLineEdit {
+    /* 基本外观 */
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 rgba(255,255,255,0.02),
+                                stop:1 rgba(255,255,255,0.01));
+    border: 0px solid transparent;            /* 去除外框，使用底部线条 */
+    border-radius: 6px;                       /* 圆角（整体轮廓） */
+    padding: 8px 12px;                        /* 上下左右内边距 */
+    color: #FFFFFF;                           /* 文本颜色（暗色背景示例） */
+    font: 13px &quot;Microsoft YaHei&quot;;
+    /* 轻微投影让输入框不那么平（仅在支持的系统下起效） */
+}
+
+/* 默认底部的一条细线（淡） */
+QLineEdit::frame {
+    border: none;
+}
+QLineEdit {
+    border-bottom: 1px solid rgba(255,255,255,0.12);
+}
+
+/* 悬停时微微提亮背景与底线 */
+QLineEdit:hover {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 rgba(255,255,255,0.035),
+                                stop:1 rgba(255,255,255,0.02));
+    border-bottom: 1px solid rgba(255,255,255,0.22);
+}
+
+/* 聚焦（或者正在编辑）时突出显示下边框 —— 主视觉色可改 */
+QLineEdit:focus {
+    outline: none;
+    /* 去掉默认虚线焦点 */
+    border-bottom: 3px solid #1E90FF; /* 高亮色：道奇蓝，改成你想要的色 */
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 rgba(255,255,255,0.04),
+                                stop:1 rgba(255,255,255,0.02));
+}
+
+/* 如果想在聚焦时配合一个微小的 glow（注意：部分 Qt 版本可能忽略 box-shadow） */
+QLineEdit:focus {
+    /* 如果系统支持 shadow-like 效果，可用 rgba 做模拟 */
+    /* 这里只是视觉提示，实际如需动画请用 QPropertyAnimation */
+
+}
+
+/* placeholder 颜色（更淡） */
+QLineEdit[echoMode=&quot;0&quot;]::placeholder { /* echoMode=0 普通文本 */
+    color: rgba(255,255,255,0.45);
+}
+
+/* 禁用状态样式 */
+QLineEdit:disabled {
+    color: rgba(255,255,255,0.25);
+    background: rgba(255,255,255,0.01);
+    border-bottom: 1px dashed rgba(255,255,255,0.06);
+}
+
+/* 清除按钮（clear button）样式：如果使用 setClearButtonEnabled(true) */
+QLineEdit QToolButton {
+    border: none;
+    background: transparent;
+    padding: 0 6px;
+    /* 你可以用 icon 代替文本；这里给个 hover 效果 */
+}
+QLineEdit QToolButton:hover {
+    background: rgba(255,255,255,0.06);
+    border-radius: 4px;
+}
+
+/* 可选：如果想把光标颜色改为高亮色 */
+QLineEdit {
+    /* 仅在 Qt 新版本上生效 */
+    /* qproperty-cursorColor: #1E90FF; */ /* 若 Qt 支持此属性可启用 */
+}
+</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="0">
+          <widget class="QLabel" name="label_time_image">
+           <property name="text">
+            <string>time:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0">
+          <widget class="QLabel" name="label_date_image">
+           <property name="text">
+            <string>date:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="7" column="1">
+          <widget class="QLabel" name="label_road">
+           <property name="text">
+            <string>文件路径</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="0">
+          <widget class="QLabel" name="label_describe_image">
+           <property name="text">
+            <string>desc:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="1">
+          <widget class="QLineEdit" name="lineEdit_describe">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>40</height>
+            </size>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">/* 精美 QLineEdit 样式（暗色主题可直接改色值） */
+/* 用法：ui-&gt;lineEdit-&gt;setStyleSheet(QStringLiteral(&lt;the stylesheet&gt;)); */
+
+QLineEdit {
+    /* 基本外观 */
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 rgba(255,255,255,0.02),
+                                stop:1 rgba(255,255,255,0.01));
+    border: 0px solid transparent;            /* 去除外框，使用底部线条 */
+    border-radius: 6px;                       /* 圆角（整体轮廓） */
+    padding: 8px 12px;                        /* 上下左右内边距 */
+    color: #FFFFFF;                           /* 文本颜色（暗色背景示例） */
+    font: 13px &quot;Microsoft YaHei&quot;;
+    /* 轻微投影让输入框不那么平（仅在支持的系统下起效） */
+
+}
+
+/* 默认底部的一条细线（淡） */
+QLineEdit::frame {
+    border: none;
+}
+QLineEdit {
+    border-bottom: 1px solid rgba(255,255,255,0.12);
+}
+
+/* 悬停时微微提亮背景与底线 */
+QLineEdit:hover {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 rgba(255,255,255,0.035),
+                                stop:1 rgba(255,255,255,0.02));
+    border-bottom: 1px solid rgba(255,255,255,0.22);
+}
+
+/* 聚焦（或者正在编辑）时突出显示下边框 —— 主视觉色可改 */
+QLineEdit:focus {
+    outline: none;
+    /* 去掉默认虚线焦点 */
+    border-bottom: 3px solid #1E90FF; /* 高亮色：道奇蓝，改成你想要的色 */
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 rgba(255,255,255,0.04),
+                                stop:1 rgba(255,255,255,0.02));
+}
+
+/* 如果想在聚焦时配合一个微小的 glow（注意：部分 Qt 版本可能忽略 box-shadow） */
+QLineEdit:focus {
+    /* 如果系统支持 shadow-like 效果，可用 rgba 做模拟 */
+    /* 这里只是视觉提示，实际如需动画请用 QPropertyAnimation */
+}
+
+/* placeholder 颜色（更淡） */
+QLineEdit[echoMode=&quot;0&quot;]::placeholder { /* echoMode=0 普通文本 */
+    color: rgba(255,255,255,0.45);
+}
+
+/* 禁用状态样式 */
+QLineEdit:disabled {
+    color: rgba(255,255,255,0.25);
+    background: rgba(255,255,255,0.01);
+    border-bottom: 1px dashed rgba(255,255,255,0.06);
+}
+
+/* 清除按钮（clear button）样式：如果使用 setClearButtonEnabled(true) */
+QLineEdit QToolButton {
+    border: none;
+    background: transparent;
+    padding: 0 6px;
+    /* 你可以用 icon 代替文本；这里给个 hover 效果 */
+}
+QLineEdit QToolButton:hover {
+    background: rgba(255,255,255,0.06);
+    border-radius: 4px;
+}
+
+/* 可选：如果想把光标颜色改为高亮色 */
+QLineEdit {
+    /* 仅在 Qt 新版本上生效 */
+    /* qproperty-cursorColor: #1E90FF; */ /* 若 Qt 支持此属性可启用 */
+}
+</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="1">
+          <widget class="QTimeEdit" name="timeEdit">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>40</height>
+            </size>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">/* 统一基本外观 */
+QDateEdit, QTimeEdit, QDateTimeEdit {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 rgba(255,255,255,0.02),
+                                stop:1 rgba(255,255,255,0.01));
+    border: 0px solid transparent;         /* 去除默认边框 */
+    border-radius: 6px;                    /* 圆角 */
+    padding: 8px 28px 8px 12px;            /* 留出右侧空间给箭头按钮 */
+    color: #FFFFFF;                        /* 文本颜色 */
+    font: 13px &quot;Microsoft YaHei&quot;;
+}
+
+/* 默认底部线条 */
+QDateEdit, QTimeEdit, QDateTimeEdit {
+    border-bottom: 1px solid rgba(255,255,255,0.12);
+}
+
+/* 悬停时微微提亮 */
+QDateEdit:hover, QTimeEdit:hover, QDateTimeEdit:hover {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 rgba(255,255,255,0.035),
+                                stop:1 rgba(255,255,255,0.02));
+    border-bottom: 1px solid rgba(255,255,255,0.22);
+}
+
+/* 聚焦时高亮下边框 */
+QDateEdit:focus, QTimeEdit:focus, QDateTimeEdit:focus {
+    outline: none;
+    border-bottom: 3px solid #1E90FF; /* 高亮色 */
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 rgba(255,255,255,0.04),
+                                stop:1 rgba(255,255,255,0.02));
+}
+
+/* 禁用状态 */
+QDateEdit:disabled, QTimeEdit:disabled, QDateTimeEdit:disabled {
+    color: rgba(255,255,255,0.25);
+    background: rgba(255,255,255,0.01);
+    border-bottom: 1px dashed rgba(255,255,255,0.06);
+}
+
+/* 下拉按钮区域（小箭头） */
+QDateEdit::drop-down, QTimeEdit::drop-down, QDateTimeEdit::drop-down {
+    subcontrol-origin: padding;
+    subcontrol-position: center right;
+    width: 20px;
+    border: none;
+    background: transparent;
+    margin-right: 4px;
+}
+
+/* 下拉按钮悬停效果 */
+QDateEdit::drop-down:hover, QTimeEdit::drop-down:hover, QDateTimeEdit::drop-down:hover {
+    background: rgba(255,255,255,0.08);
+    border-radius: 4px;
+}
+
+/* 小箭头样式 */
+QDateEdit::down-arrow, QTimeEdit::down-arrow, QDateTimeEdit::down-arrow {
+ /* 这里替换成你自己的浅色小箭头图标 */
+    width: 12px;
+    height: 12px;
+}
+
+/* 弹出日历/时间选择器样式 */
+QCalendarWidget {
+    background: #2a2a2a;         /* 深色背景 */
+    color: #eeeeee;              /* 文字颜色 */
+    border: 1px solid #444444;   /* 边框 */
+    selection-background-color: #1E90FF;
+    selection-color: #ffffff;
+}
+</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="QDateEdit" name="dateEdit">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>40</height>
+            </size>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">/* 统一基本外观 */
+QDateEdit, QTimeEdit, QDateTimeEdit {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 rgba(255,255,255,0.02),
+                                stop:1 rgba(255,255,255,0.01));
+    border: 0px solid transparent;         /* 去除默认边框 */
+    border-radius: 6px;                    /* 圆角 */
+    padding: 8px 28px 8px 12px;            /* 留出右侧空间给箭头按钮 */
+    color: #FFFFFF;                        /* 文本颜色 */
+    font: 13px &quot;Microsoft YaHei&quot;;
+
+}
+
+/* 默认底部线条 */
+QDateEdit, QTimeEdit, QDateTimeEdit {
+    border-bottom: 1px solid rgba(255,255,255,0.12);
+}
+
+/* 悬停时微微提亮 */
+QDateEdit:hover, QTimeEdit:hover, QDateTimeEdit:hover {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 rgba(255,255,255,0.035),
+                                stop:1 rgba(255,255,255,0.02));
+    border-bottom: 1px solid rgba(255,255,255,0.22);
+}
+
+/* 聚焦时高亮下边框 */
+QDateEdit:focus, QTimeEdit:focus, QDateTimeEdit:focus {
+    outline: none;
+    border-bottom: 3px solid #1E90FF; /* 高亮色 */
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 rgba(255,255,255,0.04),
+                                stop:1 rgba(255,255,255,0.02));
+}
+
+/* 禁用状态 */
+QDateEdit:disabled, QTimeEdit:disabled, QDateTimeEdit:disabled {
+    color: rgba(255,255,255,0.25);
+    background: rgba(255,255,255,0.01);
+    border-bottom: 1px dashed rgba(255,255,255,0.06);
+}
+
+/* 下拉按钮区域（小箭头） */
+QDateEdit::drop-down, QTimeEdit::drop-down, QDateTimeEdit::drop-down {
+    subcontrol-origin: padding;
+    subcontrol-position: center right;
+    width: 20px;
+    border: none;
+    background: transparent;
+    margin-right: 4px;
+}
+
+/* 下拉按钮悬停效果 */
+QDateEdit::drop-down:hover, QTimeEdit::drop-down:hover, QDateTimeEdit::drop-down:hover {
+    background: rgba(255,255,255,0.08);
+    border-radius: 4px;
+}
+
+/* 小箭头样式 */
+QDateEdit::down-arrow, QTimeEdit::down-arrow, QDateTimeEdit::down-arrow {
+    width: 12px;
+    height: 12px;
+}
+
+/* 弹出日历/时间选择器样式 */
+QCalendarWidget {
+    background: #2a2a2a;         /* 深色背景 */
+    color: #eeeeee;              /* 文字颜色 */
+    border: 1px solid #444444;   /* 边框 */
+    selection-background-color: #1E90FF;
+    selection-color: #ffffff;
+}
+</string>
+           </property>
+          </widget>
+         </item>
+         <item row="5" column="0">
+          <widget class="QLabel" name="label_info_image">
+           <property name="text">
+            <string>信息:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="8" column="1">
+          <widget class="QTextEdit" name="textEdit_road">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">/* QTextEdit 深色风格 */
+QTextEdit {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 rgba(255,255,255,0.025),
+                                stop:1 rgba(255,255,255,0.015));
+    border: 0px solid transparent;
+    border-bottom: 1px solid rgba(255,255,255,0.12);
+    border-radius: 6px;
+    padding: 8px 12px;
+    color: #FFFFFF;
+    font: 13px &quot;Microsoft YaHei&quot;;
+    selection-background-color: #1E90FF;    /* 选中文本背景 */
+    selection-color: #FFFFFF;               /* 选中文本颜色 */
+}
+
+/* 悬停效果 */
+QTextEdit:hover {
+    border-bottom: 1px solid rgba(255,255,255,0.22);
+}
+
+/* 聚焦效果 */
+QTextEdit:focus {
+    border-bottom: 3px solid #1E90FF;
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 rgba(255,255,255,0.04),
+                                stop:1 rgba(255,255,255,0.02));
+}
+
+/* 禁用状态 */
+QTextEdit:disabled {
+     color: rgb(255, 170, 255);
+    background: rgba(255,255,255,0.01);
+    border-bottom: 1px dashed rgba(255,255,255,0.06);
+}
+</string>
+           </property>
+           <property name="html">
+            <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Microsoft YaHei'; font-size:13px; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'SimSun'; font-size:9pt;&quot;&gt;c://fasd/fdsaf//fadf.png&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0" colspan="2">
+          <layout class="QHBoxLayout" name="horizontalLayout_6">
+           <item>
+            <widget class="QLabel" name="label_title">
+             <property name="font">
+              <font>
+               <pointsize>15</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>信息</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer_6">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QPushButton" name="btn_return">
+             <property name="maximumSize">
+              <size>
+               <width>24</width>
+               <height>24</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>X</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout"/>
+    </item>
+    <item>
+     <widget class="QWidget" name="buttonContainer" native="true">
+      <property name="minimumSize">
+       <size>
+        <width>500</width>
+        <height>80</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>16777215</width>
+        <height>80</height>
+       </size>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background-color:rgba(0, 0, 0, 0.5);</string>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout_5">
+       <item>
+        <spacer name="horizontalSpacer_4">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QPushButton" name="turn_left">
+         <property name="minimumSize">
+          <size>
+           <width>50</width>
+           <height>50</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>50</width>
+           <height>50</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>左旋</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="turn_right">
+         <property name="minimumSize">
+          <size>
+           <width>50</width>
+           <height>50</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>50</width>
+           <height>50</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>右旋</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="info_btn">
+         <property name="minimumSize">
+          <size>
+           <width>50</width>
+           <height>50</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>50</width>
+           <height>50</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>信息</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_5">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="prevButton">
+      <property name="minimumSize">
+       <size>
+        <width>80</width>
+        <height>80</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>80</width>
+        <height>80</height>
+       </size>
+      </property>
+      <property name="text">
+       <string>prevButton</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="nextButton">
+      <property name="minimumSize">
+       <size>
+        <width>80</width>
+        <height>80</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>80</width>
+        <height>80</height>
+       </size>
+      </property>
+      <property name="text">
+       <string>nextButton</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ImageView</class>
+   <extends>QGraphicsView</extends>
+   <header>imageview.h</header>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>
