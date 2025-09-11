@@ -57,13 +57,9 @@ private slots:
     void on_win_btn_clicked();
     void on_off_btn_clicked();
     void onImageViewMouseMoved(const QPoint &pos); // 接收鼠标移动
-
     void on_turn_left_clicked();
-
     void on_turn_right_clicked();
-
     void on_info_btn_clicked();
-
     void on_btn_return_clicked();
 
 signals:
