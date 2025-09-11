@@ -9,6 +9,9 @@
 #include <QGraphicsPixmapItem>
 #include <QMenu>
 #include "MyListViewMenu.h"
+#include <QMessageBox>
+#include <QImageReader>
+#include "ShowImageInfo.h"
 
 
 AlbumWindow::AlbumWindow(QWidget *parent)
@@ -54,18 +57,22 @@ void AlbumWindow::connectInit()
             this, &AlbumWindow::onImageViewMouseMoved);   // 图片视图中鼠标移动 -> 更新位置信息
     connect(ui->listView, &QListView::customContextMenuRequested,   //连接listview右键菜单
             this, &AlbumWindow::onListViewContextMenu);
+    connect(ui->listView->selectionModel(), &QItemSelectionModel::currentChanged,   //图片的改变->信息栏的改变
+            this, &AlbumWindow::pix_info_init);
 
 
 }
 
 void AlbumWindow::onListViewContextMenu(const QPoint &pos)
 {
+    QModelIndexList selectedIndexes = ui->listView->selectionModel()->selectedIndexes();
+    if (selectedIndexes.isEmpty()) return;
     QModelIndex index = ui->listView->indexAt(pos);
     if (!index.isValid()) return;
-
     MyListViewMenu *menu = new MyListViewMenu(this);
     menu->setCurrentIndex(index);   // 传入当前点击项
-    menu->setInitPath(albumPath);   // 传入默认文件夹
+    menu->setCurrentIndexes(selectedIndexes);
+    menu->setInitPath(albumPath); // 默认路径
     menu->move(ui->listView->viewport()->mapToGlobal(pos));
     menu->show();
 }
@@ -547,11 +554,128 @@ void AlbumWindow::on_btn_return_clicked()
 
 void AlbumWindow::on_album_add_clicked()
 {
+    // 弹出输入框，让用户输入新文件夹名称
+    bool ok;
+    QString folderName = QInputDialog::getText(this, "新建相册",
+                                               "请输入相册名称：",
+                                               QLineEdit::Normal,
+                                               "", &ok);
+    if (!ok || folderName.isEmpty()) return; // 用户取消或未输入
 
+    // 获取当前 listView 显示的文件夹路径
+    QModelIndex currentIndex = ui->listView->rootIndex();
+    QString currentDirPath;
+    if (currentIndex.isValid()) {
+        const QFileSystemModel *model = qobject_cast<const QFileSystemModel*>(ui->listView->model());
+        if (model) {
+            currentDirPath = model->filePath(currentIndex);
+        }
+    }
+
+    if (currentDirPath.isEmpty()) {
+        QMessageBox::warning(this, "错误", "无法获取当前文件夹路径！");
+        return;
+    }
+
+    // 构造新文件夹完整路径
+    QString newFolderPath = currentDirPath + "/" + folderName;
+
+    QDir dir;
+    if (dir.exists(newFolderPath)) {
+        QMessageBox::warning(this, "提示", "该相册已存在！");
+        return;
+    }
+
+    // 创建文件夹
+    if (dir.mkpath(newFolderPath)) {
+        // 刷新模型显示新文件夹
+        QFileSystemModel *model = qobject_cast<QFileSystemModel*>(ui->listView->model());
+        if (model) model->setRootPath(currentDirPath);
+    } else {
+        QMessageBox::warning(this, "错误", "相册创建失败！");
+    }
 }
+
+
 
 void AlbumWindow::on_homeButton_clicked()
 {
     ui->listView->setRootIndex(model->index(albumPath));
 }
+
+
+void AlbumWindow::on_pix_add_clicked()
+{
+    // 获取当前 listView 显示的文件夹路径
+        QModelIndex currentIndex = ui->listView->rootIndex();
+        QString currentDirPath;
+        if (currentIndex.isValid()) {
+            const QFileSystemModel *model = qobject_cast<const QFileSystemModel*>(ui->listView->model());
+            if (model) {
+                currentDirPath = model->filePath(currentIndex);
+            }
+        }
+
+        if (currentDirPath.isEmpty()) {
+            QMessageBox::warning(this, "错误", "无法获取当前相册路径！");
+            return;
+        }
+
+        // 弹出文件选择对话框，允许多选
+        QStringList fileNames = QFileDialog::getOpenFileNames(
+                    this,
+                    "选择要导入的照片",
+                    QDir::homePath(),
+                    "图片文件 (*.jpg *.jpeg *.png *.bmp *.gif)");
+
+        if (fileNames.isEmpty()) return;
+
+        int importedCount = 0;
+        for (const QString &filePath : fileNames) {
+            QFileInfo fi(filePath);
+            QString targetPath = currentDirPath + "/" + fi.fileName();
+
+            // 如果目标已经存在同名文件，可以选择覆盖或者跳过
+            if (QFile::exists(targetPath)) {
+                // 可以选择覆盖，也可以 skip，这里跳过
+                continue;
+            }
+
+            if (QFile::copy(filePath, targetPath)) {
+                importedCount++;
+            }
+        }
+
+        QMessageBox::information(this, "提示", QString("成功导入 %1 张照片").arg(importedCount));
+
+        // 刷新 listView 显示
+        QFileSystemModel *model = qobject_cast<QFileSystemModel*>(ui->listView->model());
+        if (model) model->setRootPath(currentDirPath);
+}
+
+void AlbumWindow::pix_info_init()
+{
+    // 获取当前选中索引
+    QModelIndex currentIndex = ui->listView->currentIndex();
+    if (!currentIndex.isValid()) {
+        qDebug() << "没有选中任何项";
+        return;
+    }
+
+    // 获取模型
+    QFileSystemModel *model = qobject_cast<QFileSystemModel*>(ui->listView->model());
+    if (!model) return;
+
+    // 获取文件名
+    QString fileName = model->fileName(currentIndex);
+
+    // 如果需要显示到 lineEdit
+    ui->lineEdit_name->setText(fileName);
+
+    QImage img(model->filePath(currentIndex));
+    QString info = ShowImageInfo::getImageInfo(img);
+    ui->label_msg->setText(info);
+
+}
+
 

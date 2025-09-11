@@ -17,10 +17,9 @@ public:
     explicit MyListViewMenu(QWidget *parent = nullptr);
     ~MyListViewMenu();
 
-    //获取索引
-    void setCurrentIndex(const QModelIndex &index);
-    //获取初始地址
-    void setInitPath(const QString &albumPath);
+    void setCurrentIndexes(const QModelIndexList &indexes); // 设置选中的项目
+    void setCurrentIndex(const QModelIndex &index); // 设置选中的项目
+    void setInitPath(const QString &path);                  // 设置默认初始路径
 
 private slots:
     //打开所选项目文件夹
@@ -36,13 +35,11 @@ private slots:
 
 private:
     Ui::MyListViewMenu *ui;
-    //保存所选项目
-    QModelIndex currentIndex;
-    //保存所选项目地址,名字
-    QString filePath;
-    QString fileName;
-    //初始地址
-    QString initPath;
+    QModelIndexList selectedIndexes;   // 当前选中的文件索引
+    QString initPath;                  // 默认路径
+    QStringList imageSuffixes;         // 支持的图片后缀
+    QString filePath;                  //单选地址
+    QString fileName;                  //单选名称
 };
 
 #endif // MYLISTVIEWMENU_H

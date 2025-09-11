@@ -13,6 +13,11 @@ MyListViewMenu::MyListViewMenu(QWidget *parent) :
   ,ui(new Ui::MyListViewMenu)
 {
     ui->setupUi(this);
+    // 设置菜单为无边框小窗口
+    setWindowFlags(Qt::FramelessWindowHint | Qt::Popup);
+
+    // 初始化图片类型
+    imageSuffixes <<"jpg"<<"jpeg"<<"png"<<"bmp"<<"gif";
 
 }
 
@@ -21,17 +26,21 @@ MyListViewMenu::~MyListViewMenu()
     delete ui;
 }
 
-void MyListViewMenu::setCurrentIndex(const QModelIndex &index)
+void MyListViewMenu::setCurrentIndexes(const QModelIndexList &indexes)
 {
-    currentIndex = index;
-    const QFileSystemModel *model = static_cast<const QFileSystemModel*>(currentIndex.model());
-    filePath = model->filePath(currentIndex);
-    fileName = model->fileName(currentIndex);
+    selectedIndexes = indexes;
 }
 
-void MyListViewMenu::setInitPath(const QString &albumPath)
+void MyListViewMenu::setCurrentIndex(const QModelIndex &index)
 {
-    initPath = albumPath;
+    const QFileSystemModel *model = static_cast<const QFileSystemModel*>(index.model());
+    filePath = model->filePath(index);
+    fileName = model->fileName(index);
+}
+
+void MyListViewMenu::setInitPath(const QString &path)
+{
+    initPath = path;
 }
 
 void MyListViewMenu::on_menu_btn_open_clicked()
@@ -45,22 +54,25 @@ void MyListViewMenu::on_menu_btn_open_clicked()
 
 void MyListViewMenu::on_menu_btn_delete_clicked()
 {
-    QMessageBox::StandardButton reply;
-    reply = QMessageBox::question(this, "确认删除",
-                                  "你确定要删除这个文件吗？",
-                                  QMessageBox::Yes | QMessageBox::No);
+    if (selectedIndexes.isEmpty()) return;
 
-    if (reply == QMessageBox::Yes) {
-        if(QFile::remove(filePath)){
-            return;
+    int deletedCount = 0;
+    for (const QModelIndex &index : selectedIndexes) {
+        const QAbstractItemModel *abstractModel = index.model();
+        const QFileSystemModel *model = qobject_cast<const QFileSystemModel*>(abstractModel);
+        if (!model) continue;
+        QString filePath = model->filePath(index);
+
+        QFileInfo fi(filePath);
+
+        if (fi.isDir()) {
+            QDir dir(filePath);
+            if (dir.removeRecursively()) deletedCount++;
+        } else if (fi.isFile()) {
+            if (QFile::remove(filePath)) deletedCount++;
         }
-        else{
-            QMessageBox::critical(this, "错误", "删除文件失败！");
-        }
-    } else {
-        qDebug() << "用户取消删除";
     }
-
+    QMessageBox::information(this, "提示", QString("已删除 %1 个文件/文件夹").arg(deletedCount));
 }
 
 void MyListViewMenu::on_menu_btn_rename_clicked()
@@ -95,89 +107,50 @@ void MyListViewMenu::on_menu_btn_rename_clicked()
 
 void MyListViewMenu::on_menu_btn_move_clicked()
 {
-    // 打开文件夹选择对话框，初始路径是 initPath
-    QString targetDir = QFileDialog::getExistingDirectory(
-                this,
-                "选择目标文件夹",
-                initPath,                  // 默认初始文件夹
-                QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks
-                );
+    if (selectedIndexes.isEmpty()) return;
+
+    QString targetDir = QFileDialog::getExistingDirectory(this, "选择目标文件夹", initPath,
+                                                          QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
     if (targetDir.isEmpty()) return;
 
-    // 定义允许移动的图片后缀
-    QStringList imageSuffixes = {"jpg", "jpeg", "png", "bmp", "gif"};
+    int movedCount = 0;
+    for (const QModelIndex &index : selectedIndexes) {
+        const QAbstractItemModel *abstractModel = index.model();
+        const QFileSystemModel *model = qobject_cast<const QFileSystemModel*>(abstractModel);
+        if (!model) continue;
+        QString filePath = model->filePath(index);
 
-    // 判断选中的 filePath 是否是文件夹还是单个文件
-    QFileInfo fi(filePath);
 
-    if (fi.isDir()) {
-        // 如果是文件夹，遍历文件夹下的内容
-        QDir dir(filePath);
-        QFileInfoList entries = dir.entryInfoList(QDir::Files | QDir::NoDotAndDotDot);
-        int movedCount = 0;
-        for (const QFileInfo &entry : entries) {
-            QString suffix = entry.suffix().toLower();
-            if (imageSuffixes.contains(suffix)) {
-                QString newPath = targetDir + "/" + entry.fileName();
-                if (QFile::rename(entry.absoluteFilePath(), newPath)) {
-                    movedCount++;
-                }
-            }
-        }
-        QMessageBox::information(this, "提示",
-                                 QString("已移动 %1 张图片").arg(movedCount));
-    } else if (fi.isFile()) {
-        // 单个文件
-        QString newPath = targetDir + "/" + QFileInfo(filePath).fileName();
-        if (QFile::rename(filePath, newPath)) {
-            return;
-        } else {
-            QMessageBox::warning(this, "错误", "移动失败！");
+        QFileInfo fi(filePath);
+        if (fi.isFile() && imageSuffixes.contains(fi.suffix().toLower())) {
+            QString newPath = targetDir + "/" + fi.fileName();
+            if (QFile::rename(filePath, newPath)) movedCount++;
         }
     }
+    QMessageBox::information(this, "提示", QString("已移动 %1 张图片").arg(movedCount));
 }
 
 void MyListViewMenu::on_menu_btn_copy_clicked()
 {
-    // 打开文件夹选择对话框，初始路径是 initPath
-    QString targetDir = QFileDialog::getExistingDirectory(
-                this,
-                "选择目标文件夹",
-                initPath,                  // 默认初始文件夹
-                QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks
-                );
+    if (selectedIndexes.isEmpty()) return;
+
+    QString targetDir = QFileDialog::getExistingDirectory(this, "选择目标文件夹", initPath,
+                                                          QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
     if (targetDir.isEmpty()) return;
 
-    // 定义允许复制的图片后缀
-    QStringList imageSuffixes = {"jpg", "jpeg", "png", "bmp", "gif"};
+    int copiedCount = 0;
+    for (const QModelIndex &index : selectedIndexes) {
+        const QAbstractItemModel *abstractModel = index.model();
+        const QFileSystemModel *model = qobject_cast<const QFileSystemModel*>(abstractModel);
+        if (!model) continue;
+        QString filePath = model->filePath(index);
 
-    // 判断选中的 filePath 是否是文件夹还是单个文件
-    QFileInfo fi(filePath);
 
-    if (fi.isDir()) {
-        // 如果是文件夹，遍历文件夹下的内容
-        QDir dir(filePath);
-        QFileInfoList entries = dir.entryInfoList(QDir::Files | QDir::NoDotAndDotDot);
-        int copiedCount = 0;
-        for (const QFileInfo &entry : entries) {
-            QString suffix = entry.suffix().toLower();
-            if (imageSuffixes.contains(suffix)) {
-                QString newPath = targetDir + "/" + entry.fileName();
-                if (QFile::copy(entry.absoluteFilePath(), newPath)) {
-                    copiedCount++;
-                }
-            }
-        }
-        QMessageBox::information(this, "提示",
-                                 QString("已复制 %1 张图片").arg(copiedCount));
-    } else if (fi.isFile()) {
-        // 单个文件
-        QString newPath = targetDir + "/" + fi.fileName();
-        if (QFile::copy(fi.absoluteFilePath(), newPath)) {
-            return;
-        } else {
-            QMessageBox::warning(this, "错误", "图片复制失败！");
+        QFileInfo fi(filePath);
+        if (fi.isFile() && imageSuffixes.contains(fi.suffix().toLower())) {
+            QString newPath = targetDir + "/" + fi.fileName();
+            if (QFile::copy(filePath, newPath)) copiedCount++;
         }
     }
-
+    QMessageBox::information(this, "提示", QString("已复制 %1 张图片").arg(copiedCount));
 }

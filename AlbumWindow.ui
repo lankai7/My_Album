@@ -78,7 +78,7 @@ QScrollBar::sub-line:horizontal {
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout_3">
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,0,0,0,0,0,0,0,0,0,0,0">
+     <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,0,0,0,0,0,0,0,0,0,0,0,0">
       <property name="spacing">
        <number>2</number>
       </property>
@@ -123,6 +123,13 @@ QScrollBar::sub-line:horizontal {
        <widget class="QPushButton" name="album_add">
         <property name="text">
          <string>创建相册</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pix_add">
+        <property name="text">
+         <string>导入照片</string>
         </property>
        </widget>
       </item>

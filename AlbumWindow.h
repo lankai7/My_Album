@@ -95,6 +95,10 @@ private slots:
     void onListViewContextMenu(const QPoint &pos);
     //返回初始目录
     void on_homeButton_clicked();
+    //导入照片
+    void on_pix_add_clicked();
+    //照片信息
+    void pix_info_init();
 
 signals:
 

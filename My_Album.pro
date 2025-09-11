@@ -13,13 +13,15 @@ win32:LIBS += -user32
 SOURCES += \
     ImageView.cpp \
     MyListViewMenu.cpp \
+    ShowImageInfo.cpp \
     main.cpp \
     AlbumWindow.cpp
 
 HEADERS += \
     AlbumWindow.h \
     ImageView.h \
-    MyListViewMenu.h
+    MyListViewMenu.h \
+    ShowImageInfo.h
 
 FORMS += \
     AlbumWindow.ui \
