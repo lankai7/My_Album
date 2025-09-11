@@ -7,6 +7,8 @@
 #include <windows.h>
 #include <windowsx.h>
 #include <QGraphicsPixmapItem>
+#include <QMenu>
+#include "MyListViewMenu.h"
 
 
 AlbumWindow::AlbumWindow(QWidget *parent)
@@ -15,54 +17,69 @@ AlbumWindow::AlbumWindow(QWidget *parent)
     ,model(new QFileSystemModel(this))
 {
     ui->setupUi(this);
+    //初始化ui与窗口
+    WindowInit();
+    //初始化默认相册
+    albumInit();
+    //初始化listview
+    listviewInit();
+    //初始化悬浮按钮
+    buttonViewInit();
+    //初始化connect
+    connectInit();
+    //初始化鼠标事件
+    mouseEventInit();
 
-    // 设置无边框（隐藏标题栏，但保留最小化、最大化、关闭等功能）
-    setWindowFlags(Qt::FramelessWindowHint | Qt::WindowSystemMenuHint |
-                   Qt::WindowMinMaxButtonsHint | Qt::WindowCloseButtonHint);
-    setAttribute(Qt::WA_TranslucentBackground, false); // 如果需要透明再改 true
+}
 
-    ui->label_msg->setFixedHeight(60);
-    ui->label_msg->setAlignment(Qt::AlignLeft | Qt::AlignTop);
+AlbumWindow::~AlbumWindow()
+{
+    delete ui;
+}
+
+void AlbumWindow::connectInit()
+{
+    // 连接信号与槽函数
+    connect(ui->listView, &QListView::clicked,
+            this, &AlbumWindow::onListViewClicked);       // 单击列表项 -> 触发选中处理
+    connect(ui->prevButton, &QPushButton::clicked,
+            this, &AlbumWindow::onPrevClicked);           // 点击上一张按钮 -> 显示上一张图片
+    connect(ui->nextButton, &QPushButton::clicked,
+            this, &AlbumWindow::onNextClicked);           // 点击下一张按钮 -> 显示下一张图片
+    connect(ui->listView, &QListView::doubleClicked,
+            this, &AlbumWindow::onListViewDoubleClicked); // 双击列表项 -> 打开图片
+    connect(ui->backButton, &QPushButton::clicked,
+            this, &AlbumWindow::onBackClicked);           // 点击返回按钮 -> 返回上一级界面
+    connect(static_cast<ImageView*>(ui->graphicsView), &ImageView::mouseMoved,
+            this, &AlbumWindow::onImageViewMouseMoved);   // 图片视图中鼠标移动 -> 更新位置信息
+    connect(ui->listView, &QListView::customContextMenuRequested,   //连接listview右键菜单
+            this, &AlbumWindow::onListViewContextMenu);
 
 
-    // 初始化 scene
-    scene = new QGraphicsScene(this);
-    ui->graphicsView->setScene(scene);
-    ui->graphicsView->setRenderHint(QPainter::Antialiasing);
-    ui->graphicsView->setDragMode(QGraphicsView::ScrollHandDrag);
+}
 
-    ui->graphicsView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    ui->graphicsView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+void AlbumWindow::onListViewContextMenu(const QPoint &pos)
+{
+    QModelIndex index = ui->listView->indexAt(pos);
+    if (!index.isValid()) return;
 
-    // 创建一个存放相册的文件夹Album
-    QDir dir("Album");
-    if (dir.exists()) {
-        qDebug()<<"Album is existence!";
-    }
-    else{
-        QDir dir("");
-        if(dir.mkpath("Album")){
-            qDebug()<<"Album create success!";
-        }
-        else{
-            qDebug()<<"!Album is err";
-        }
-    }
+    MyListViewMenu *menu = new MyListViewMenu(this);
+    menu->setCurrentIndex(index);   // 传入当前点击项
+    menu->setInitPath(albumPath);   // 传入默认文件夹
+    menu->move(ui->listView->viewport()->mapToGlobal(pos));
+    menu->show();
+}
 
-    // 初始化文件模型
-    model = new QFileSystemModel(this);
-    QString albumPath = QDir::currentPath() + "/Album"; // 初始文件夹
-    model->setRootPath(albumPath);
 
-    // 只显示图片文件
-    QStringList filters;
-    filters << "*.png" << "*.jpg" << "*.jpeg" << "*.bmp" << "*.gif";
-    model->setNameFilters(filters);
-    model->setNameFilterDisables(false);
 
-    ui->listView->setModel(model);
-    ui->listView->setRootIndex(model->index(albumPath));
+void AlbumWindow::mouseEventInit()
+{
+    setMouseTracking(true);             // 窗口本身捕获鼠标移动
+    ui->centralwidget->setMouseTracking(true); // centralwidget 也捕获鼠标移动
+}
 
+void AlbumWindow::buttonViewInit()
+{
     // 按钮初始隐藏或显示都可以
     ui->prevButton->setVisible(false);
     ui->nextButton->setVisible(false);
@@ -81,29 +98,77 @@ AlbumWindow::AlbumWindow(QWidget *parent)
 
     ui->graphicsView->show();
     resizeEvent(nullptr);
-
-    // 在构造函数里绑定点击信号
-    connect(ui->listView, &QListView::clicked,
-            this, &AlbumWindow::onListViewClicked);
-    connect(ui->prevButton, &QPushButton::clicked, this, &AlbumWindow::onPrevClicked);
-    connect(ui->nextButton, &QPushButton::clicked, this, &AlbumWindow::onNextClicked);
-    connect(ui->listView, &QListView::doubleClicked,
-            this, &AlbumWindow::onListViewDoubleClicked);
-    connect(ui->backButton, &QPushButton::clicked, this, &AlbumWindow::onBackClicked);
-    connect(static_cast<ImageView*>(ui->graphicsView), &ImageView::mouseMoved,
-            this, &AlbumWindow::onImageViewMouseMoved);
-
-    setMouseTracking(true);             // 窗口本身捕获鼠标移动
-    ui->centralwidget->setMouseTracking(true); // centralwidget 也捕获鼠标移动
-
 }
 
-AlbumWindow::~AlbumWindow()
+void AlbumWindow::listviewInit()
 {
-    delete ui;
+    // 初始化文件模型
+    model = new QFileSystemModel(this);
+    albumPath = QDir::currentPath() + "/Album"; // 初始文件夹
+    model->setRootPath(albumPath);
+
+    // 只显示图片文件
+    QStringList filters;
+    filters << "*.png" << "*.jpg" << "*.jpeg" << "*.bmp" << "*.gif";
+    model->setNameFilters(filters);
+    model->setNameFilterDisables(false);
+
+    ui->listView->setModel(model);
+    ui->listView->setRootIndex(model->index(albumPath));
+
+    //支持多选
+    ui->listView->setSelectionMode(QAbstractItemView::ExtendedSelection);
 }
 
-//选择相册打开相册文件夹
+void AlbumWindow::albumInit()
+{
+    // 创建一个存放相册的文件夹Album
+    QDir dir("Album");
+    if (dir.exists()) {
+        qDebug()<<"Album is existence!";
+    }
+    else{
+        QDir dir("");
+        if(dir.mkpath("Album")){
+            qDebug()<<"Album create success!";
+        }
+        else{
+            qDebug()<<"!Album is err";
+        }
+    }
+}
+
+void AlbumWindow::WindowInit()
+{
+    // 设置无边框（隐藏标题栏，但保留最小化、最大化、关闭等功能）
+    setWindowFlags(Qt::FramelessWindowHint | Qt::WindowSystemMenuHint |
+                   Qt::WindowMinMaxButtonsHint | Qt::WindowCloseButtonHint);
+    setAttribute(Qt::WA_TranslucentBackground, false); // 如果需要透明再改 true
+
+    //设置缩放普通化默认大小
+    normalGeometry = QRect(100,100,1200,700);
+
+    //设置信息栏对齐
+    ui->label_msg->setFixedHeight(60);
+    ui->label_msg->setAlignment(Qt::AlignLeft | Qt::AlignTop);
+
+    // 初始化 scene
+    scene = new QGraphicsScene(this);
+    ui->graphicsView->setScene(scene);
+    ui->graphicsView->setRenderHint(QPainter::Antialiasing);
+    ui->graphicsView->setDragMode(QGraphicsView::ScrollHandDrag);
+
+    ui->graphicsView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    ui->graphicsView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+
+    ui->listView->setFocusPolicy(Qt::NoFocus); // 去掉焦点，这样虚线消失
+    //设置右键菜单
+    ui->listView->setContextMenuPolicy(Qt::CustomContextMenu);
+
+
+}
+
+
 void AlbumWindow::on_album_open_clicked()
 {
     // 打开文件夹选择对话框
@@ -127,7 +192,7 @@ void AlbumWindow::on_album_open_clicked()
     }
 }
 
-// 槽函数：点击 listView 显示图片
+
 void AlbumWindow::onListViewClicked(const QModelIndex &index)
 {
     if (!index.isValid())
@@ -170,7 +235,7 @@ void AlbumWindow::onListViewClicked(const QModelIndex &index)
     }
 }
 
-//上一张图片
+
 void AlbumWindow::onPrevClicked()
 {
     if (!currentIndex.isValid())
@@ -185,7 +250,7 @@ void AlbumWindow::onPrevClicked()
     }
 }
 
-//下一张图片
+
 void AlbumWindow::onNextClicked()
 {
     if (!currentIndex.isValid())
@@ -200,7 +265,7 @@ void AlbumWindow::onNextClicked()
     }
 }
 
-//自动计算按钮位置
+
 void AlbumWindow::resizeEvent(QResizeEvent *event)
 {
     QMainWindow::resizeEvent(event);
@@ -216,7 +281,7 @@ void AlbumWindow::resizeEvent(QResizeEvent *event)
     ui->buttonContainer->move(x, y);
 }
 
-//分别处理文件夹与图片
+
 void AlbumWindow::onListViewDoubleClicked(const QModelIndex &index)
 {
     if (!index.isValid())
@@ -239,7 +304,7 @@ void AlbumWindow::onListViewDoubleClicked(const QModelIndex &index)
 
 }
 
-//返回按钮
+
 void AlbumWindow::onBackClicked()
 {
     if (backStack.isEmpty())
@@ -249,7 +314,7 @@ void AlbumWindow::onBackClicked()
     ui->listView->setRootIndex(model->index(prevPath));
 }
 
-//列表隐藏按钮
+
 void AlbumWindow::on_list_hide_clicked()
 {
     if (ui->listView->isVisible()) {
@@ -267,13 +332,13 @@ void AlbumWindow::on_list_hide_clicked()
     });
 }
 
-//最小化按钮
+
 void AlbumWindow::on_min_btn_clicked()
 {
     this->showMinimized();
 }
 
-//最大化按钮
+
 void AlbumWindow::on_win_btn_clicked()
 {
     if (this->isMaximized()) {
@@ -285,7 +350,7 @@ void AlbumWindow::on_win_btn_clicked()
     }
 }
 
-//关闭窗口按钮
+
 void AlbumWindow::on_off_btn_clicked()
 {
     this->close();
@@ -403,8 +468,6 @@ void AlbumWindow::mouseMoveEvent(QMouseEvent *event)
             double xRatio = (double)event->pos().x() / width();
             double yRatio = (double)event->pos().y() / height();
 
-            if (normalGeometry.isNull()) normalGeometry = QRect(100,100,1600,900);
-
             showNormal();
             resize(normalGeometry.size());
 
@@ -448,21 +511,21 @@ void AlbumWindow::onImageViewMouseMoved(const QPoint &pos)
 }
 //=======================================================================
 
-//左转按钮
+
 void AlbumWindow::on_turn_left_clicked()
 {
     if(item!=nullptr)
         item->setRotation(item->rotation() - 90);
 }
 
-//右转按钮
+
 void AlbumWindow::on_turn_right_clicked()
 {
     if(item!=nullptr)
-        item->setRotation(item->rotation() - 90);
+        item->setRotation(item->rotation() + 90);
 }
 
-//信息按钮
+
 void AlbumWindow::on_info_btn_clicked()
 {
     if (ui->info_widget->isVisible()){
@@ -476,7 +539,19 @@ void AlbumWindow::on_info_btn_clicked()
     });
 }
 
+
 void AlbumWindow::on_btn_return_clicked()
 {
     on_info_btn_clicked();
 }
+
+void AlbumWindow::on_album_add_clicked()
+{
+
+}
+
+void AlbumWindow::on_homeButton_clicked()
+{
+    ui->listView->setRootIndex(model->index(albumPath));
+}
+

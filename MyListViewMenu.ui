@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MyListViewMenu</class>
+ <widget class="QWidget" name="MyListViewMenu">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>98</width>
+    <height>128</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">background-color: rgb(255, 255, 255);</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="spacing">
+    <number>0</number>
+   </property>
+   <item>
+    <widget class="QPushButton" name="menu_btn_open">
+     <property name="styleSheet">
+      <string notr="true">QPushButton {
+    background-color: rgba(0,0,0,0);  /* 透明背景 */
+    border: none;                     /* 无边框 */
+    border-radius: 8px;               /* 圆角半径 */
+    color: black;                     /* 文字颜色，可自定义 */
+    padding: 5px 10px;                /* 内边距 */
+}
+
+QPushButton:hover {
+    background-color: rgb(164, 170, 182);         /* 鼠标悬停背景色 */
+}
+
+QPushButton:pressed {
+    background-color: #3399FF;        /* 鼠标按下背景色 */
+}</string>
+     </property>
+     <property name="text">
+      <string>打开文件夹</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="menu_btn_delete">
+     <property name="styleSheet">
+      <string notr="true">QPushButton {
+    background-color: rgba(0,0,0,0);  /* 透明背景 */
+    border: none;                     /* 无边框 */
+    border-radius: 8px;               /* 圆角半径 */
+    color: black;                     /* 文字颜色，可自定义 */
+    padding: 5px 10px;                /* 内边距 */
+}
+
+QPushButton:hover {
+    background-color: rgb(164, 170, 182);         /* 鼠标悬停背景色 */
+}
+
+QPushButton:pressed {
+    background-color: #3399FF;        /* 鼠标按下背景色 */
+}</string>
+     </property>
+     <property name="text">
+      <string>删除</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="menu_btn_rename">
+     <property name="styleSheet">
+      <string notr="true">QPushButton {
+    background-color: rgba(0,0,0,0);  /* 透明背景 */
+    border: none;                     /* 无边框 */
+    border-radius: 8px;               /* 圆角半径 */
+    color: black;                     /* 文字颜色，可自定义 */
+    padding: 5px 10px;                /* 内边距 */
+}
+
+QPushButton:hover {
+    background-color: rgb(164, 170, 182);         /* 鼠标悬停背景色 */
+}
+
+QPushButton:pressed {
+    background-color: #3399FF;        /* 鼠标按下背景色 */
+}</string>
+     </property>
+     <property name="text">
+      <string>重命名</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="menu_btn_move">
+     <property name="styleSheet">
+      <string notr="true">QPushButton {
+    background-color: rgba(0,0,0,0);  /* 透明背景 */
+    border: none;                     /* 无边框 */
+    border-radius: 8px;               /* 圆角半径 */
+    color: black;                     /* 文字颜色，可自定义 */
+    padding: 5px 10px;                /* 内边距 */
+}
+
+QPushButton:hover {
+    background-color: rgb(164, 170, 182);         /* 鼠标悬停背景色 */
+}
+
+QPushButton:pressed {
+    background-color: #3399FF;        /* 鼠标按下背景色 */
+}</string>
+     </property>
+     <property name="text">
+      <string>移动到</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="menu_btn_copy">
+     <property name="styleSheet">
+      <string notr="true">QPushButton {
+    background-color: rgba(0,0,0,0);  /* 透明背景 */
+    border: none;                     /* 无边框 */
+    border-radius: 8px;               /* 圆角半径 */
+    color: black;                     /* 文字颜色，可自定义 */
+    padding: 5px 10px;                /* 内边距 */
+}
+
+QPushButton:hover {
+    background-color: rgb(164, 170, 182);         /* 鼠标悬停背景色 */
+}
+
+QPushButton:pressed {
+    background-color: #3399FF;        /* 鼠标按下背景色 */
+}</string>
+     </property>
+     <property name="text">
+      <string>复制到</string>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

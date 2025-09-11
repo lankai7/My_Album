@@ -12,15 +12,18 @@ win32:LIBS += -user32
 
 SOURCES += \
     ImageView.cpp \
+    MyListViewMenu.cpp \
     main.cpp \
     AlbumWindow.cpp
 
 HEADERS += \
     AlbumWindow.h \
-    ImageView.h
+    ImageView.h \
+    MyListViewMenu.h
 
 FORMS += \
-    AlbumWindow.ui
+    AlbumWindow.ui \
+    MyListViewMenu.ui
 
 TRANSLATIONS += \
     My_Album_yue_CN.ts

@@ -17,6 +17,7 @@
    <string notr="true">AlbumWindow {
     /* 背景色 */
     background-color:rgb(46,47,48);
+border:8px;
 }
 /* 垂直滚动条整体 */
 QScrollBar:vertical {
@@ -998,6 +999,9 @@ p, li { white-space: pre-wrap; }
      </widget>
     </item>
    </layout>
+   <zorder>buttonContainer</zorder>
+   <zorder>prevButton</zorder>
+   <zorder>nextButton</zorder>
   </widget>
  </widget>
  <customwidgets>
