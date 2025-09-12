@@ -23,5 +23,6 @@
         <file>res/size.png</file>
         <file>res/icon.png</file>
         <file>res/info2.png</file>
+        <file>res/icon.ico</file>
     </qresource>
 </RCC>
