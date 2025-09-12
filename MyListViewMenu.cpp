@@ -4,7 +4,7 @@
 #include <QUrl>
 #include <QInputDialog>
 #include <QDebug>
-#include <QMessageBox>
+#include "TipLabel.h"
 #include <QInputDialog>
 #include <QFileDialog>
 
@@ -72,7 +72,7 @@ void MyListViewMenu::on_menu_btn_delete_clicked()
             if (QFile::remove(filePath)) deletedCount++;
         }
     }
-    QMessageBox::information(this, "提示", QString("已删除 %1 个文件/文件夹").arg(deletedCount));
+    TipLabel::showTip(this, QString("✅已删除 %1 个文件/文件夹").arg(deletedCount));
 }
 
 void MyListViewMenu::on_menu_btn_rename_clicked()
@@ -98,9 +98,10 @@ void MyListViewMenu::on_menu_btn_rename_clicked()
 
     // 执行重命名
     if (QFile::rename(filePath, newPath)) {
+        TipLabel::showTip(this, "✅重命名成功！");
         return;
     } else {
-        QMessageBox::warning(this, "错误", "重命名失败！");
+        TipLabel::showTip(this, "❌重命名失败！");
     }
 
 }
@@ -127,7 +128,7 @@ void MyListViewMenu::on_menu_btn_move_clicked()
             if (QFile::rename(filePath, newPath)) movedCount++;
         }
     }
-    QMessageBox::information(this, "提示", QString("已移动 %1 张图片").arg(movedCount));
+    TipLabel::showTip(this, QString("已移动 %1 张图片").arg(movedCount));
 }
 
 void MyListViewMenu::on_menu_btn_copy_clicked()
@@ -152,5 +153,5 @@ void MyListViewMenu::on_menu_btn_copy_clicked()
             if (QFile::copy(filePath, newPath)) copiedCount++;
         }
     }
-    QMessageBox::information(this, "提示", QString("已复制 %1 张图片").arg(copiedCount));
+    TipLabel::showTip(this, QString("已复制 %1 张图片").arg(copiedCount));
 }

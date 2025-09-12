@@ -1,0 +1,27 @@
+<RCC>
+    <qresource prefix="/new">
+        <file>res/copy.png</file>
+        <file>res/add.png</file>
+        <file>res/close.png</file>
+        <file>res/close2.png</file>
+        <file>res/hide.png</file>
+        <file>res/home.png</file>
+        <file>res/import.png</file>
+        <file>res/maxWin.png</file>
+        <file>res/min.png</file>
+        <file>res/return.png</file>
+        <file>res/unhide.png</file>
+        <file>res/window.png</file>
+        <file>res/importPix.png</file>
+        <file>res/info.png</file>
+        <file>res/next.png</file>
+        <file>res/prev.png</file>
+        <file>res/turnLeft.png</file>
+        <file>res/turnRight.png</file>
+        <file>res/date.png</file>
+        <file>res/road.png</file>
+        <file>res/size.png</file>
+        <file>res/icon.png</file>
+        <file>res/info2.png</file>
+    </qresource>
+</RCC>

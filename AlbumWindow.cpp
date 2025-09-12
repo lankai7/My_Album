@@ -9,9 +9,11 @@
 #include <QGraphicsPixmapItem>
 #include <QMenu>
 #include "MyListViewMenu.h"
-#include <QMessageBox>
 #include <QImageReader>
 #include "ShowImageInfo.h"
+#include "TipLabel.h"
+#include <QApplication>
+#include <QClipboard>
 
 
 AlbumWindow::AlbumWindow(QWidget *parent)
@@ -155,10 +157,6 @@ void AlbumWindow::WindowInit()
     //设置缩放普通化默认大小
     normalGeometry = QRect(100,100,1200,700);
 
-    //设置信息栏对齐
-    ui->label_msg->setFixedHeight(60);
-    ui->label_msg->setAlignment(Qt::AlignLeft | Qt::AlignTop);
-
     // 初始化 scene
     scene = new QGraphicsScene(this);
     ui->graphicsView->setScene(scene);
@@ -172,6 +170,25 @@ void AlbumWindow::WindowInit()
     //设置右键菜单
     ui->listView->setContextMenuPolicy(Qt::CustomContextMenu);
 
+    //设置时间按钮隐藏
+    ui->createTime->setButtonSymbols(QAbstractSpinBox::NoButtons);
+    ui->modifiedTime->setButtonSymbols(QAbstractSpinBox::NoButtons);
+
+    qApp->setStyleSheet(
+                "QToolTip {"
+                "background-color: rgba(0,0,0,180);"
+                "color: white;"
+                "padding: 5px;"
+                "border-radius: 4px;"
+                "border: 1px solid white;"
+                "}"
+                );
+    ui->label_name_image->setToolTip("文件名");
+    ui->label_road_image->setToolTip("文件路径");
+    ui->label_info_image->setToolTip("图片信息");
+    ui->label_create_image->setToolTip("创建时间");
+    ui->label_modified_image->setToolTip("修改时间");
+    ui->label_size_image->setToolTip("文件大小");
 
 }
 
@@ -246,6 +263,7 @@ void AlbumWindow::onListViewClicked(const QModelIndex &index)
 void AlbumWindow::onPrevClicked()
 {
     if (!currentIndex.isValid())
+        TipLabel::showTip(this, "✅已经到达列表顶部！");
         return;
 
     int row = currentIndex.row() - 1;
@@ -261,6 +279,7 @@ void AlbumWindow::onPrevClicked()
 void AlbumWindow::onNextClicked()
 {
     if (!currentIndex.isValid())
+        TipLabel::showTip(this, "✅这已经是最后一张了！");
         return;
 
     int row = currentIndex.row() + 1;
@@ -328,11 +347,13 @@ void AlbumWindow::on_list_hide_clicked()
         // listView 当前可见 → 隐藏
         ui->listView->setVisible(false); // 隐藏
         ui->list_hide->setText("显示列表");
+        ui->list_hide->setIcon(QIcon(":/new/res/hide.png"));
 
     } else {
         // listView 当前隐藏 → 显示
         ui->listView->setVisible(true);  // 显示
         ui->list_hide->setText("隐藏列表");
+        ui->list_hide->setIcon(QIcon(":/new/res/unhide.png"));
     }
     QTimer::singleShot(0, this, [this]() {
         resizeEvent(nullptr);
@@ -348,12 +369,16 @@ void AlbumWindow::on_min_btn_clicked()
 
 void AlbumWindow::on_win_btn_clicked()
 {
-    if (this->isMaximized()) {
-        // 如果已经最大化 → 切换为普通窗口
-        this->showNormal();
+    if (isMaximized()) {
+        // 还原窗口
+        showNormal();
+        if (!normalGeometry.isNull())
+            setGeometry(normalGeometry);
+
     } else {
-        // 如果是普通窗口 → 切换为最大化
-        this->showMaximized();
+        // 最大化窗口前先保存当前大小
+        normalGeometry = geometry();
+        showMaximized();
     }
 }
 
@@ -362,6 +387,20 @@ void AlbumWindow::on_off_btn_clicked()
 {
     this->close();
 }
+
+//窗口改变事件
+void AlbumWindow::changeEvent(QEvent *event)
+{
+    if (event->type() == QEvent::WindowStateChange) {
+        if (this->isMaximized()) {
+            ui->win_btn->setIcon(QIcon(":/new/res/window.png"));
+        } else {
+            ui->win_btn->setIcon(QIcon(":/new/res/maxWin.png"));
+        }
+    }
+    QMainWindow::changeEvent(event);
+}
+
 
 //================================鼠标事件================================
 void AlbumWindow::mouseDoubleClickEvent(QMouseEvent *event)
@@ -573,7 +612,7 @@ void AlbumWindow::on_album_add_clicked()
     }
 
     if (currentDirPath.isEmpty()) {
-        QMessageBox::warning(this, "错误", "无法获取当前文件夹路径！");
+        TipLabel::showTip(this, "❗无法获取当前文件夹路径！");
         return;
     }
 
@@ -582,7 +621,7 @@ void AlbumWindow::on_album_add_clicked()
 
     QDir dir;
     if (dir.exists(newFolderPath)) {
-        QMessageBox::warning(this, "提示", "该相册已存在！");
+        TipLabel::showTip(this, "❌该相册已存在！");
         return;
     }
 
@@ -592,7 +631,7 @@ void AlbumWindow::on_album_add_clicked()
         QFileSystemModel *model = qobject_cast<QFileSystemModel*>(ui->listView->model());
         if (model) model->setRootPath(currentDirPath);
     } else {
-        QMessageBox::warning(this, "错误", "相册创建失败！");
+        TipLabel::showTip(this, "❌相册创建失败！");
     }
 }
 
@@ -607,50 +646,49 @@ void AlbumWindow::on_homeButton_clicked()
 void AlbumWindow::on_pix_add_clicked()
 {
     // 获取当前 listView 显示的文件夹路径
-        QModelIndex currentIndex = ui->listView->rootIndex();
-        QString currentDirPath;
-        if (currentIndex.isValid()) {
-            const QFileSystemModel *model = qobject_cast<const QFileSystemModel*>(ui->listView->model());
-            if (model) {
-                currentDirPath = model->filePath(currentIndex);
-            }
+    QModelIndex currentIndex = ui->listView->rootIndex();
+    QString currentDirPath;
+    if (currentIndex.isValid()) {
+        const QFileSystemModel *model = qobject_cast<const QFileSystemModel*>(ui->listView->model());
+        if (model) {
+            currentDirPath = model->filePath(currentIndex);
+        }
+    }
+
+    if (currentDirPath.isEmpty()) {
+        TipLabel::showTip(this, "❌无法获取当前相册路径！");
+        return;
+    }
+
+    // 弹出文件选择对话框，允许多选
+    QStringList fileNames = QFileDialog::getOpenFileNames(
+                this,
+                "选择要导入的照片",
+                QDir::homePath(),
+                "图片文件 (*.jpg *.jpeg *.png *.bmp *.gif)");
+
+    if (fileNames.isEmpty()) return;
+
+    int importedCount = 0;
+    for (const QString &filePath : fileNames) {
+        QFileInfo fi(filePath);
+        QString targetPath = currentDirPath + "/" + fi.fileName();
+
+        // 如果目标已经存在同名文件，可以选择覆盖或者跳过
+        if (QFile::exists(targetPath)) {
+            // 可以选择覆盖，也可以 skip，这里跳过
+            continue;
         }
 
-        if (currentDirPath.isEmpty()) {
-            QMessageBox::warning(this, "错误", "无法获取当前相册路径！");
-            return;
+        if (QFile::copy(filePath, targetPath)) {
+            importedCount++;
         }
+    }
+    TipLabel::showTip(this, QString("✅成功导入 %1 张照片").arg(importedCount));
 
-        // 弹出文件选择对话框，允许多选
-        QStringList fileNames = QFileDialog::getOpenFileNames(
-                    this,
-                    "选择要导入的照片",
-                    QDir::homePath(),
-                    "图片文件 (*.jpg *.jpeg *.png *.bmp *.gif)");
-
-        if (fileNames.isEmpty()) return;
-
-        int importedCount = 0;
-        for (const QString &filePath : fileNames) {
-            QFileInfo fi(filePath);
-            QString targetPath = currentDirPath + "/" + fi.fileName();
-
-            // 如果目标已经存在同名文件，可以选择覆盖或者跳过
-            if (QFile::exists(targetPath)) {
-                // 可以选择覆盖，也可以 skip，这里跳过
-                continue;
-            }
-
-            if (QFile::copy(filePath, targetPath)) {
-                importedCount++;
-            }
-        }
-
-        QMessageBox::information(this, "提示", QString("成功导入 %1 张照片").arg(importedCount));
-
-        // 刷新 listView 显示
-        QFileSystemModel *model = qobject_cast<QFileSystemModel*>(ui->listView->model());
-        if (model) model->setRootPath(currentDirPath);
+    // 刷新 listView 显示
+    QFileSystemModel *model = qobject_cast<QFileSystemModel*>(ui->listView->model());
+    if (model) model->setRootPath(currentDirPath);
 }
 
 void AlbumWindow::pix_info_init()
@@ -668,14 +706,72 @@ void AlbumWindow::pix_info_init()
 
     // 获取文件名
     QString fileName = model->fileName(currentIndex);
+    // 获取文件地址
+    QString filePath = model->filePath(currentIndex);
 
-    // 如果需要显示到 lineEdit
     ui->lineEdit_name->setText(fileName);
+    ui->textEdit_road->setText(filePath);
 
     QImage img(model->filePath(currentIndex));
-    QString info = ShowImageInfo::getImageInfo(img);
-    ui->label_msg->setText(info);
+    QString info = ShowImageInfo::getImageInfo(img,filePath);
+    ui->textEdit_msg->setText(info);
+
+    // 获取创建时间以及修改时间
+    QDateTime createTime = ShowImageInfo::getImageCreatedTime(filePath);
+    QDateTime modifiedTime = ShowImageInfo::getImageModifiedTime(filePath);
+
+    ui->createTime->setDateTime(createTime);
+    ui->modifiedTime->setDateTime(modifiedTime);
+
+    // 获取文件大小
+    QString size = ShowImageInfo::getImageSize(filePath);
+    ui->lineEdit_size->setText(size);
 
 }
 
 
+
+void AlbumWindow::on_copy_btn_clicked()
+{
+    if(ui->textEdit_road->toPlainText() == nullptr){
+        TipLabel::showTip(this, "❎没有地址！");
+        return;
+    }
+    // 获取剪切板
+    QClipboard *clipboard = QApplication::clipboard();
+    // 设置文本
+    clipboard->setText(ui->textEdit_road->toPlainText());
+    TipLabel::showTip(this, "✅已复制到剪切板！");
+}
+
+void AlbumWindow::on_lineEdit_name_returnPressed()
+{
+    // 获取当前选中索引
+    QModelIndex currentIndex = ui->listView->currentIndex();
+    if (!currentIndex.isValid()) {
+        return;
+    }
+
+    // 获取模型
+    QFileSystemModel *model = qobject_cast<QFileSystemModel*>(ui->listView->model());
+    if (!model) return;
+
+    // 当前文件路径
+    QString filePath = model->filePath(currentIndex);
+    QFileInfo fi(filePath);
+
+    // 获取LineEdit里的新名字（带后缀）
+    QString newName = ui->lineEdit_name->text().trimmed();
+    if (newName.isEmpty()) return;
+
+    // 拼接新路径
+    QString newPath = fi.absolutePath() + "/" + newName;
+
+    // 执行重命名
+    if (QFile::rename(filePath, newPath)) {
+        TipLabel::showTip(this, "✅重命名成功！");
+
+    } else {
+        TipLabel::showTip(this, "❎重命名失败！");
+    }
+}

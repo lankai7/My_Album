@@ -62,6 +62,8 @@ private:
     void mouseMoveEvent(QMouseEvent *event)override;
     void mouseReleaseEvent(QMouseEvent *event)override;
     void mouseDoubleClickEvent(QMouseEvent *event)override;
+    //窗口事件
+    void changeEvent(QEvent *event);
 private slots:
     // 槽函数：点击 listView 显示图片
     void onListViewClicked(const QModelIndex &index);
@@ -99,6 +101,10 @@ private slots:
     void on_pix_add_clicked();
     //照片信息
     void pix_info_init();
+    //复制路径按钮
+    void on_copy_btn_clicked();
+    //修改文件名
+    void on_lineEdit_name_returnPressed();
 
 signals:
 

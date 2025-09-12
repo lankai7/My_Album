@@ -14,6 +14,7 @@ SOURCES += \
     ImageView.cpp \
     MyListViewMenu.cpp \
     ShowImageInfo.cpp \
+    TipLabel.cpp \
     main.cpp \
     AlbumWindow.cpp
 
@@ -21,7 +22,8 @@ HEADERS += \
     AlbumWindow.h \
     ImageView.h \
     MyListViewMenu.h \
-    ShowImageInfo.h
+    ShowImageInfo.h \
+    TipLabel.h
 
 FORMS += \
     AlbumWindow.ui \
@@ -34,3 +36,6 @@ TRANSLATIONS += \
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+RESOURCES += \
+    res.qrc

@@ -11,6 +11,7 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     AlbumWindow w;
     w.setWindowTitle("Album");
+    w.setWindowIcon(QIcon(":/new/res/icon.png"));
     w.showMaximized();
     return a.exec();
 }
