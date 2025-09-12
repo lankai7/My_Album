@@ -262,9 +262,9 @@ void AlbumWindow::onListViewClicked(const QModelIndex &index)
 
 void AlbumWindow::onPrevClicked()
 {
-    if (!currentIndex.isValid())
-        TipLabel::showTip(this, "✅已经到达列表顶部！");
+    if (!currentIndex.isValid()){
         return;
+    }
 
     int row = currentIndex.row() - 1;
     QModelIndex parentIndex = currentIndex.parent();
@@ -273,14 +273,17 @@ void AlbumWindow::onPrevClicked()
         ui->listView->setCurrentIndex(prev);
         onListViewClicked(prev);
     }
+    else{
+        TipLabel::showTip(this, "✅已经到达列表顶部！");
+    }
 }
 
 
 void AlbumWindow::onNextClicked()
 {
-    if (!currentIndex.isValid())
-        TipLabel::showTip(this, "✅这已经是最后一张了！");
+    if (!currentIndex.isValid()){
         return;
+    }
 
     int row = currentIndex.row() + 1;
     QModelIndex parentIndex = currentIndex.parent();
@@ -288,6 +291,9 @@ void AlbumWindow::onNextClicked()
         QModelIndex next = model->index(row, 0, parentIndex);
         ui->listView->setCurrentIndex(next);
         onListViewClicked(next);
+    }
+    else{
+        TipLabel::showTip(this, "✅这已经是最后一张了！");
     }
 }
 
@@ -305,6 +311,17 @@ void AlbumWindow::resizeEvent(QResizeEvent *event)
     int x = (ui->imageContainer->width() - ui->buttonContainer->width()) / 2; // 横向居中
     int y = ui->imageContainer->height() - ui->buttonContainer->height() - 0; // 距离底部 0 像素
     ui->buttonContainer->move(x, y);
+
+    //计算悬浮框宽度
+    if (ui->buttonContainer) {
+            // 保持当前y坐标和高度不变，宽度适应父控件
+            ui->buttonContainer->setGeometry(
+                0,                                  // x坐标
+                ui->buttonContainer->y(),           // y坐标保持不变
+                ui->imageContainer->width(),        // 宽度等于父控件宽度
+                ui->buttonContainer->height()       // 高度保持不变
+            );
+        }
 }
 
 

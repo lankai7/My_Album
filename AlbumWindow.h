@@ -51,10 +51,6 @@ private:
     void albumInit();
     //初始化窗口设置与ui设置
     void WindowInit();
-    //上一张图片
-    void onPrevClicked();
-    //下一张图片
-    void onNextClicked();
     //自动计算按钮位置
     void resizeEvent(QResizeEvent *event) override;
     //鼠标事件
@@ -65,6 +61,10 @@ private:
     //窗口事件
     void changeEvent(QEvent *event);
 private slots:
+    //上一张图片
+    void onPrevClicked();
+    //下一张图片
+    void onNextClicked();
     // 槽函数：点击 listView 显示图片
     void onListViewClicked(const QModelIndex &index);
     //选择相册打开相册文件夹
