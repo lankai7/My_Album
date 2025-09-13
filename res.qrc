@@ -24,5 +24,6 @@
         <file>res/icon.png</file>
         <file>res/info2.png</file>
         <file>res/icon.ico</file>
+        <file>res/Help.png</file>
     </qresource>
 </RCC>

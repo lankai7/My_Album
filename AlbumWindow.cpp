@@ -131,20 +131,27 @@ void AlbumWindow::listviewInit()
 
 void AlbumWindow::albumInit()
 {
-    // 创建一个存放相册的文件夹Album
-    QDir dir("Album");
-    if (dir.exists()) {
-        qDebug()<<"Album is existence!";
-    }
-    else{
-        QDir dir("");
-        if(dir.mkpath("Album")){
-            qDebug()<<"Album create success!";
+        QDir dir("Album");
+        if (dir.exists()) {
+            qDebug() << "Album is existence!";
+        } else {
+            QDir currentDir("");
+            if(currentDir.mkpath("Album")) {
+                qDebug() << "Album create success!";
+
+                // 从资源文件复制图片
+                QFile sourceFile(":/new/res/Help.png"); // 资源文件路径
+                QString destinationPath = "Album/Help.png";
+
+                if (sourceFile.copy(destinationPath)) {
+                    qDebug() << "Image copied from resources to Album folder!";
+                } else {
+                    qDebug() << "Failed to copy image from resources:" << sourceFile.errorString();
+                }
+            } else {
+                qDebug() << "!Album creation error";
+            }
         }
-        else{
-            qDebug()<<"!Album is err";
-        }
-    }
 }
 
 void AlbumWindow::WindowInit()
