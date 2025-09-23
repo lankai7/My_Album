@@ -16,6 +16,7 @@
 #include <QClipboard>
 
 
+
 AlbumWindow::AlbumWindow(QWidget *parent)
     : QMainWindow(parent)
     ,ui(new Ui::AlbumWindow)
@@ -116,9 +117,13 @@ void AlbumWindow::listviewInit()
     albumPath = QDir::currentPath() + "/Album"; // 初始文件夹
     model->setRootPath(albumPath);
 
-    // 只显示图片文件
+    // 只显示图片和视频文件
     QStringList filters;
+    // 图片格式
     filters << "*.png" << "*.jpg" << "*.jpeg" << "*.bmp" << "*.gif";
+    // 视频格式
+    filters << "*.mp4" << "*.avi" << "*.mkv" << "*.mov" << "*.wmv" << "*.flv";
+
     model->setNameFilters(filters);
     model->setNameFilterDisables(false);
 
@@ -131,27 +136,27 @@ void AlbumWindow::listviewInit()
 
 void AlbumWindow::albumInit()
 {
-        QDir dir("Album");
-        if (dir.exists()) {
-            qDebug() << "Album is existence!";
-        } else {
-            QDir currentDir("");
-            if(currentDir.mkpath("Album")) {
-                qDebug() << "Album create success!";
+    QDir dir("Album");
+    if (dir.exists()) {
+        qDebug() << "Album is existence!";
+    } else {
+        QDir currentDir("");
+        if(currentDir.mkpath("Album")) {
+            qDebug() << "Album create success!";
 
-                // 从资源文件复制图片
-                QFile sourceFile(":/new/res/Help.png"); // 资源文件路径
-                QString destinationPath = "Album/Help.png";
+            // 从资源文件复制图片
+            QFile sourceFile(":/new/res/Help.png"); // 资源文件路径
+            QString destinationPath = "Album/Help.png";
 
-                if (sourceFile.copy(destinationPath)) {
-                    qDebug() << "Image copied from resources to Album folder!";
-                } else {
-                    qDebug() << "Failed to copy image from resources:" << sourceFile.errorString();
-                }
+            if (sourceFile.copy(destinationPath)) {
+                qDebug() << "Image copied from resources to Album folder!";
             } else {
-                qDebug() << "!Album creation error";
+                qDebug() << "Failed to copy image from resources:" << sourceFile.errorString();
             }
+        } else {
+            qDebug() << "!Album creation error";
         }
+    }
 }
 
 void AlbumWindow::WindowInit()
@@ -229,80 +234,109 @@ void AlbumWindow::onListViewClicked(const QModelIndex &index)
     if (!index.isValid())
         return;
 
-    // 获取文件路径
     QString filePath = model->filePath(index);
     QFileInfo info(filePath);
 
-    // 显示图片名字到 QLabel
-    ui->pix_name->setText(info.fileName()); // 只显示文件名，不含路径
-
-    // 简单判断是不是图片
+    ui->pix_name->setText(info.fileName());
     QString suffix = info.suffix().toLower();
-    if (suffix == "png" || suffix == "jpg" || suffix == "jpeg" || suffix == "bmp" || suffix == "gif") {
 
+    // ================== 图片处理 ==================
+    if (suffix == "png" || suffix == "jpg" || suffix == "jpeg" || suffix == "bmp" || suffix == "gif") {
         currentIndex = index;
+
+        // 清理视频播放器
+        if (player) {
+            player->stop();
+            delete player;
+            player = nullptr;
+            videoItem = nullptr;
+        }
 
         QPixmap pixmap(filePath);
         if (!pixmap.isNull()) {
             scene->clear();
-            // 保持原始尺寸加入 scene
             item = scene->addPixmap(pixmap);
-            item->setTransformationMode(Qt::SmoothTransformation); // 缩放时高质量
+            item->setTransformationMode(Qt::SmoothTransformation);
             scene->setSceneRect(pixmap.rect());
-            //设置图片围绕中心旋转
             item->setTransformOriginPoint(item->boundingRect().center());
 
-            // 自动缩放让图片完整显示
             ui->graphicsView->setRenderHint(QPainter::SmoothPixmapTransform, true);
             ui->graphicsView->fitInView(scene->sceneRect(), Qt::KeepAspectRatio);
-
-            // 可选：稍微缩小一点，比如缩小 90%
             ui->graphicsView->scale(0.9, 0.9);
         } else {
             qDebug() << "图片加载失败：" << filePath;
         }
-    } else {
-        qDebug() << "不是图片文件：" << filePath;
+    }
+    // ================== 视频处理 ==================
+    else if (suffix == "mp4" || suffix == "avi" || suffix == "mkv" || suffix == "mov" || suffix == "wmv" || suffix == "flv") {
+        qDebug() << "打开视频文件：" << filePath;
+
+        // 清理之前的图片或视频
+        scene->clear();
+        if (player) {
+            player->stop();
+            delete player;
+            player = nullptr;
+            videoItem = nullptr;
+        }
+
+        // 创建视频播放器
+        player = new QMediaPlayer(this);
+        videoItem = new QGraphicsVideoItem();
+        videoItem->setZValue(0); // 确保在底层
+        scene->addItem(videoItem);
+        player->setVideoOutput(videoItem);
+
+        player->setMedia(QUrl::fromLocalFile(filePath));
+        player->play();
+
+        // 自适应大小
+        QRectF sceneRect = QRectF(QPointF(0,0), ui->graphicsView->viewport()->size());
+        videoItem->setSize(sceneRect.size());
+        scene->setSceneRect(sceneRect);
+        ui->graphicsView->fitInView(scene->sceneRect(), Qt::KeepAspectRatio);
+
+        // 按钮悬浮在 graphicsView 上方
+        ui->buttonContainer->setParent(ui->graphicsView->viewport());
+        ui->prevButton->setParent(ui->graphicsView->viewport());
+        ui->nextButton->setParent(ui->graphicsView->viewport());
+        ui->buttonContainer->raise();
+        ui->prevButton->raise();
+        ui->nextButton->raise();
+    }
+    // ================== 其他文件 ==================
+    else {
+        qDebug() << "不支持的文件类型：" << filePath;
     }
 }
+
 
 
 void AlbumWindow::onPrevClicked()
 {
-    if (!currentIndex.isValid()){
-        return;
-    }
-
     int row = currentIndex.row() - 1;
-    QModelIndex parentIndex = currentIndex.parent();
     if (row >= 0) {
-        QModelIndex prev = model->index(row, 0, parentIndex);
+        QModelIndex prev = model->index(row, 0, currentIndex.parent());
         ui->listView->setCurrentIndex(prev);
         onListViewClicked(prev);
-    }
-    else{
+    } else {
         TipLabel::showTip(this, "✅已经到达列表顶部！");
     }
 }
 
-
 void AlbumWindow::onNextClicked()
 {
-    if (!currentIndex.isValid()){
-        return;
-    }
-
     int row = currentIndex.row() + 1;
-    QModelIndex parentIndex = currentIndex.parent();
-    if (row < model->rowCount(parentIndex)) {
-        QModelIndex next = model->index(row, 0, parentIndex);
+    if (row < model->rowCount(currentIndex.parent())) {
+        QModelIndex next = model->index(row, 0, currentIndex.parent());
         ui->listView->setCurrentIndex(next);
         onListViewClicked(next);
-    }
-    else{
-        TipLabel::showTip(this, "✅这已经是最后一张了！");
+    } else {
+        TipLabel::showTip(this, "✅已经是最后一张了！");
     }
 }
+
+
 
 
 void AlbumWindow::resizeEvent(QResizeEvent *event)
@@ -321,14 +355,15 @@ void AlbumWindow::resizeEvent(QResizeEvent *event)
 
     //计算悬浮框宽度
     if (ui->buttonContainer) {
-            // 保持当前y坐标和高度不变，宽度适应父控件
-            ui->buttonContainer->setGeometry(
-                0,                                  // x坐标
-                ui->buttonContainer->y(),           // y坐标保持不变
-                ui->imageContainer->width(),        // 宽度等于父控件宽度
-                ui->buttonContainer->height()       // 高度保持不变
-            );
-        }
+        // 保持当前y坐标和高度不变，宽度适应父控件
+        ui->buttonContainer->setGeometry(
+                    0,                                  // x坐标
+                    ui->buttonContainer->y(),           // y坐标保持不变
+                    ui->imageContainer->width(),        // 宽度等于父控件宽度
+                    ui->buttonContainer->height()       // 高度保持不变
+                    );
+    }
+
 }
 
 
@@ -687,9 +722,13 @@ void AlbumWindow::on_pix_add_clicked()
     // 弹出文件选择对话框，允许多选
     QStringList fileNames = QFileDialog::getOpenFileNames(
                 this,
-                "选择要导入的照片",
+                "选择要导入的媒体文件",
                 QDir::homePath(),
-                "图片文件 (*.jpg *.jpeg *.png *.bmp *.gif)");
+                "媒体文件 (*.jpg *.jpeg *.png *.bmp *.gif *.mp4 *.avi *.mkv *.mov *.wmv *.flv);;"
+                "图片文件 (*.jpg *.jpeg *.png *.bmp *.gif);;"
+                "视频文件 (*.mp4 *.avi *.mkv *.mov *.wmv *.flv);;"
+                "所有文件 (*.*)");
+
 
     if (fileNames.isEmpty()) return;
 

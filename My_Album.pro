@@ -1,7 +1,10 @@
 QT       += core gui
+QT += multimedia multimediawidgets
+
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
+QT += widgets
 CONFIG += c++11
 win32:LIBS += -user32
 
@@ -15,6 +18,7 @@ SOURCES += \
     MyListViewMenu.cpp \
     ShowImageInfo.cpp \
     TipLabel.cpp \
+    VideoPlayer.cpp \
     main.cpp \
     AlbumWindow.cpp
 
@@ -23,7 +27,8 @@ HEADERS += \
     ImageView.h \
     MyListViewMenu.h \
     ShowImageInfo.h \
-    TipLabel.h
+    TipLabel.h \
+    VideoPlayer.h
 
 FORMS += \
     AlbumWindow.ui \

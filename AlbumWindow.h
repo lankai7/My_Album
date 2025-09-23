@@ -8,6 +8,12 @@
 #include <QFileSystemModel>
 #include <QGraphicsScene>
 #include <QStack>
+#include "VideoPlayer.h"
+#include <QGraphicsVideoItem>
+#include <QMediaPlayer>
+#include <QMediaPlaylist>
+#include <QVideoWidget>
+#include <QGraphicsProxyWidget>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class AlbumWindow; }
@@ -38,6 +44,8 @@ private:
     ResizeEdge resizeEdge = None;
     const int borderWidth = 5; // 调整大小的边缘宽度
     bool isLeft;
+    QMediaPlayer *player = nullptr;
+    QGraphicsVideoItem *videoItem = nullptr;
 
     //connect 初始化
     void connectInit();
