@@ -19,6 +19,8 @@ MyListViewMenu::MyListViewMenu(QWidget *parent) :
     // 初始化图片类型
     imageSuffixes <<"jpg"<<"jpeg"<<"png"<<"bmp"<<"gif";
 
+    this->parent = parent;
+
 }
 
 MyListViewMenu::~MyListViewMenu()
@@ -72,7 +74,8 @@ void MyListViewMenu::on_menu_btn_delete_clicked()
             if (QFile::remove(filePath)) deletedCount++;
         }
     }
-    TipLabel::showTip(this, QString("✅已删除 %1 个文件/文件夹").arg(deletedCount));
+    TipLabel::showTip(parent, QString("✅已删除 %1 个文件/文件夹").arg(deletedCount));
+    this->close();
 }
 
 void MyListViewMenu::on_menu_btn_rename_clicked()

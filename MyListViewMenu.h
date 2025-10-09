@@ -40,6 +40,7 @@ private:
     QStringList imageSuffixes;         // 支持的图片后缀
     QString filePath;                  //单选地址
     QString fileName;                  //单选名称
+    QWidget *parent;
 };
 
 #endif // MYLISTVIEWMENU_H
