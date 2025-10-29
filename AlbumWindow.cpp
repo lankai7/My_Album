@@ -45,6 +45,8 @@ AlbumWindow::AlbumWindow(QWidget *parent)
     mouseEventInit();
     //启用窗口接受拖放事件
     setAcceptDrops(true);
+    //检测注册表更新
+    registerAsImageViewer();
 }
 
 AlbumWindow::~AlbumWindow()
@@ -212,7 +214,6 @@ void AlbumWindow::copyResourceImage(const QString &albumPath)
         qDebug() << "复制 Help.png 失败:" << sourceFile.errorString();
     }
 }
-
 
 void AlbumWindow::WindowInit()
 {
@@ -896,40 +897,48 @@ void AlbumWindow::on_lineEdit_name_returnPressed()
 
 void AlbumWindow::registerAsImageViewer()
 {
-    // 获取程序路径（转为 Windows 风格分隔符）
     QString appPath = QDir::toNativeSeparators(QCoreApplication::applicationFilePath());
     QFileInfo info(appPath);
-    QString appName = info.baseName();  // 如 “MyAlbum”
+    QString appName = info.baseName();
     QString appDisplayName = "MyAlbum 图片查看器";
 
     qDebug() << "注册文件关联:" << appPath;
 
-    // 写入到 HKCU（用户注册表，不需要管理员）
     QSettings settings("HKEY_CURRENT_USER\\Software\\Classes", QSettings::NativeFormat);
-
     QStringList extensions = {".jpg", ".jpeg", ".png", ".bmp", ".gif"};
 
+    bool needsUpdate = false;
+
+    // 检查是否需要更新
     for (const QString &ext : extensions) {
         QString progId = appName + ext + "file";
+        QString currentCommand = settings.value(progId + "/shell/open/command/Default").toString();
 
-        // 1. 文件扩展名关联程序标识
-        settings.setValue(ext + "/Default", progId);
-
-        // 2. 程序标识描述
-        settings.setValue(progId + "/Default", appDisplayName);
-
-        // 3. 图标路径
-        settings.setValue(progId + "/DefaultIcon/Default", "\"" + appPath + "\",0");
-
-        // 4. 打开命令
-        QString command = "\"" + appPath + "\" \"%1\"";
-        settings.setValue(progId + "/shell/open/command/Default", command);
+        if (!currentCommand.contains(appPath)) {
+            needsUpdate = true;
+            break;
+        }
     }
 
-    settings.sync();
-    qDebug() << " 文件关联注册完成。";
-    SHChangeNotify(SHCNE_ASSOCCHANGED, SHCNF_IDLIST, NULL, NULL);
+    // 如果需要更新或首次注册
+    if (needsUpdate || settings.value(".jpg/Default").toString().isEmpty()) {
+        for (const QString &ext : extensions) {
+            QString progId = appName + ext + "file";
 
+            settings.setValue(ext + "/Default", progId);
+            settings.setValue(progId + "/Default", appDisplayName);
+            settings.setValue(progId + "/DefaultIcon/Default", "\"" + appPath + "\",0");
+
+            QString command = "\"" + appPath + "\" \"%1\"";
+            settings.setValue(progId + "/shell/open/command/Default", command);
+        }
+
+        settings.sync();
+        SHChangeNotify(SHCNE_ASSOCCHANGED, SHCNF_IDLIST, NULL, NULL);
+        qDebug() << "文件关联注册/更新完成。";
+    } else {
+        qDebug() << "文件关联已是最新，无需更新。";
+    }
 }
 
 void AlbumWindow::openImage(const QString &filePath)
