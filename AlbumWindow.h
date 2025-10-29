@@ -26,6 +26,8 @@ class AlbumWindow : public QMainWindow
 public:
     AlbumWindow(QWidget *parent = nullptr);
     ~AlbumWindow();
+    //外部直接打开图片
+    void openImage(const QString &filePath);
 protected:
 
 private:
@@ -68,6 +70,9 @@ private:
     void mouseDoubleClickEvent(QMouseEvent *event)override;
     //窗口事件
     void changeEvent(QEvent *event);
+    //创建HELP.png
+    void copyResourceImage(const QString &albumPath);
+
 private slots:
     //上一张图片
     void onPrevClicked();
@@ -113,6 +118,12 @@ private slots:
     void on_copy_btn_clicked();
     //修改文件名
     void on_lineEdit_name_returnPressed();
+    //注册注册表
+    void registerAsImageViewer();
+
+protected:
+    void dragEnterEvent(QDragEnterEvent *event) override;
+    void dropEvent(QDropEvent *event) override;
 
 signals:
 

@@ -16,6 +16,8 @@ protected:
 
 signals:
     void mouseMoved(const QPoint &pos); // 鼠标移动信号
+    // 当用户拖入图片文件时发出信号
+    void imageDropped(const QString &filePath);
 
 private:
     void mouseMoveEvent(QMouseEvent *event)override;

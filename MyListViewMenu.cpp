@@ -74,6 +74,7 @@ void MyListViewMenu::on_menu_btn_delete_clicked()
             if (QFile::remove(filePath)) deletedCount++;
         }
     }
+
     TipLabel::showTip(parent, QString("✅已删除 %1 个文件/文件夹").arg(deletedCount));
     this->close();
 }

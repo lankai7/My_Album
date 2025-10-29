@@ -14,7 +14,12 @@
 #include "TipLabel.h"
 #include <QApplication>
 #include <QClipboard>
-
+#include <QMessageBox>
+#include <QSettings>
+#include <windows.h>
+#include <shlobj.h>
+#include <QMimeData>
+#include "ImageView.h"
 
 
 AlbumWindow::AlbumWindow(QWidget *parent)
@@ -22,6 +27,9 @@ AlbumWindow::AlbumWindow(QWidget *parent)
     ,ui(new Ui::AlbumWindow)
     ,model(new QFileSystemModel(this))
 {
+    //恢复第一次打开时默认状态
+    //QSettings("MyCompany", "MyApp").remove("AlbumInitialized");
+
     ui->setupUi(this);
     //初始化ui与窗口
     WindowInit();
@@ -35,7 +43,8 @@ AlbumWindow::AlbumWindow(QWidget *parent)
     connectInit();
     //初始化鼠标事件
     mouseEventInit();
-
+    //启用窗口接受拖放事件
+    setAcceptDrops(true);
 }
 
 AlbumWindow::~AlbumWindow()
@@ -62,7 +71,10 @@ void AlbumWindow::connectInit()
             this, &AlbumWindow::onListViewContextMenu);
     connect(ui->listView->selectionModel(), &QItemSelectionModel::currentChanged,   //图片的改变->信息栏的改变
             this, &AlbumWindow::pix_info_init);
-
+    connect(ui->graphicsView, &ImageView::imageDropped, this, [=](const QString &path){
+        qDebug() << "拖入的图片路径:" << path;
+        openImage(path);
+    });
 
 }
 
@@ -114,7 +126,7 @@ void AlbumWindow::listviewInit()
 {
     // 初始化文件模型
     model = new QFileSystemModel(this);
-    albumPath = QDir::currentPath() + "/Album"; // 初始文件夹
+    albumPath = QStandardPaths::writableLocation(QStandardPaths::PicturesLocation) + "/MyAlbum"; // 初始文件夹
     model->setRootPath(albumPath);
 
     // 只显示图片和视频文件
@@ -136,28 +148,69 @@ void AlbumWindow::listviewInit()
 
 void AlbumWindow::albumInit()
 {
-    QDir dir("Album");
-    if (dir.exists()) {
-        qDebug() << "Album is existence!";
-    } else {
-        QDir currentDir("");
-        if(currentDir.mkpath("Album")) {
-            qDebug() << "Album create success!";
+    // QSettings 用于保存初始化状态
+    QSettings settings("MyCompany", "MyApp");
 
-            // 从资源文件复制图片
-            QFile sourceFile(":/new/res/Help.png"); // 资源文件路径
-            QString destinationPath = "Album/Help.png";
+    // 是否已初始化
+    bool initialized = settings.value("AlbumInitialized", false).toBool();
 
-            if (sourceFile.copy(destinationPath)) {
-                qDebug() << "Image copied from resources to Album folder!";
-            } else {
-                qDebug() << "Failed to copy image from resources:" << sourceFile.errorString();
-            }
+    // 获取系统的“图片”目录，例如：
+    // Windows: C:/Users/用户名/Pictures
+    // macOS:   ~/Pictures
+    // Linux:   ~/图片 或 ~/Pictures
+    QString picturesPath = QStandardPaths::writableLocation(QStandardPaths::PicturesLocation);
+
+    // 在系统图片目录下创建 Album 文件夹
+    QString albumPath = picturesPath + "/MyAlbum";
+    QDir dir(albumPath);
+
+    // 如果目录不存在则创建
+    if (!dir.exists()) {
+        if (QDir().mkpath(albumPath)) {
+            qDebug() << "Album 文件夹已创建:" << albumPath;
         } else {
-            qDebug() << "!Album creation error";
+            qDebug() << "创建 Album 文件夹失败:" << albumPath;
+            return;
         }
     }
+
+    // 如果未初始化，复制资源图片并记录状态
+    if (!initialized) {
+        //第一次运行：复制 Help.png 到系统图片文件夹
+        copyResourceImage(albumPath);
+        //注册注册表
+        registerAsImageViewer();
+        // 保存标志
+        settings.setValue("AlbumInitialized", true);
+        settings.setValue("AlbumCreatedTime", QDateTime::currentDateTime().toString(Qt::ISODate));
+        settings.sync();
+
+        qDebug() << "初始化完成，写入 QSettings。";
+    } else {
+        qDebug() << "检测到初始化标志，不再复制 Help.png。";
+    }
 }
+
+void AlbumWindow::copyResourceImage(const QString &albumPath)
+{
+    QFile sourceFile(":/new/res/Help.png");
+    QString destinationPath = QDir(albumPath).filePath("Help.png");
+
+    // 如果目标文件已存在，先删除
+    if (QFile::exists(destinationPath)) {
+        QFile::remove(destinationPath);
+    }
+
+    if (sourceFile.copy(destinationPath)) {
+        qDebug() << "Help.png 已复制到:" << destinationPath;
+        // 去掉只读属性
+        QFile destFile(destinationPath);
+        destFile.setPermissions(QFile::WriteUser | QFile::ReadUser);
+    } else {
+        qDebug() << "复制 Help.png 失败:" << sourceFile.errorString();
+    }
+}
+
 
 void AlbumWindow::WindowInit()
 {
@@ -838,3 +891,124 @@ void AlbumWindow::on_lineEdit_name_returnPressed()
         TipLabel::showTip(this, "❎重命名失败！");
     }
 }
+
+void AlbumWindow::registerAsImageViewer()
+{
+    // 获取程序路径（转为 Windows 风格分隔符）
+    QString appPath = QDir::toNativeSeparators(QCoreApplication::applicationFilePath());
+    QFileInfo info(appPath);
+    QString appName = info.baseName();  // 如 “MyAlbum”
+    QString appDisplayName = "MyAlbum 图片查看器";
+
+    qDebug() << "注册文件关联:" << appPath;
+
+    // 写入到 HKCU（用户注册表，不需要管理员）
+    QSettings settings("HKEY_CURRENT_USER\\Software\\Classes", QSettings::NativeFormat);
+
+    QStringList extensions = {".jpg", ".jpeg", ".png", ".bmp", ".gif"};
+
+    for (const QString &ext : extensions) {
+        QString progId = appName + ext + "file";
+
+        // 1. 文件扩展名关联程序标识
+        settings.setValue(ext + "/Default", progId);
+
+        // 2. 程序标识描述
+        settings.setValue(progId + "/Default", appDisplayName);
+
+        // 3. 图标路径
+        settings.setValue(progId + "/DefaultIcon/Default", "\"" + appPath + "\",0");
+
+        // 4. 打开命令
+        QString command = "\"" + appPath + "\" \"%1\"";
+        settings.setValue(progId + "/shell/open/command/Default", command);
+    }
+
+    settings.sync();
+    qDebug() << " 文件关联注册完成。";
+    SHChangeNotify(SHCNE_ASSOCCHANGED, SHCNF_IDLIST, NULL, NULL);
+
+}
+
+void AlbumWindow::openImage(const QString &filePath)
+{
+    // 你的图片打开逻辑
+    QPixmap pixmap(filePath);
+    // 清理视频播放器
+    if (player) {
+        player->stop();
+        delete player;
+        player = nullptr;
+        videoItem = nullptr;
+    }
+    if (!pixmap.isNull()) {
+        scene->clear();
+        item = scene->addPixmap(pixmap);
+        item->setTransformationMode(Qt::SmoothTransformation);
+        scene->setSceneRect(pixmap.rect());
+        item->setTransformOriginPoint(item->boundingRect().center());
+
+        ui->graphicsView->setRenderHint(QPainter::SmoothPixmapTransform, true);
+        ui->graphicsView->fitInView(scene->sceneRect(), Qt::KeepAspectRatio);
+        ui->graphicsView->scale(0.9, 0.9);
+
+        // 获取文件所在的文件夹路径
+        QFileInfo fileInfo(filePath);
+        QString directoryPath = fileInfo.absolutePath();  // 获取文件夹路径
+
+        QModelIndex index = model->setRootPath(directoryPath);
+        ui->listView->setRootIndex(index);
+
+        // 在listView中选中当前打开的文件
+        QModelIndex fileIndex = model->index(filePath);
+        if (fileIndex.isValid()) {
+            ui->listView->setCurrentIndex(fileIndex);
+        }
+        //图片名称
+        ui->pix_name->setText(fileInfo.fileName());
+    }
+    else{
+        QMessageBox::warning(this, "错误", "图片已损坏或无法读取！");
+    }
+    if(ui->listView->isVisible())
+        on_list_hide_clicked();
+}
+
+/**
+ * @brief   :支持拖放图片文件打开
+ * @date    :2025.10.29
+ **/
+void AlbumWindow::dragEnterEvent(QDragEnterEvent *event)
+{
+    // 如果拖入的是文件并且是图片类型，就接受
+    if (event->mimeData()->hasUrls()) {
+        QList<QUrl> urls = event->mimeData()->urls();
+        if (!urls.isEmpty()) {
+            QString filePath = urls.first().toLocalFile();
+            QFileInfo fi(filePath);
+            QString ext = fi.suffix().toLower();
+
+            QStringList validExt = {"jpg", "jpeg", "png", "bmp", "gif"};
+            if (validExt.contains(ext)) {
+                event->acceptProposedAction();  // 接受拖拽
+                return;
+            }
+        }
+    }
+    event->ignore();
+}
+
+void AlbumWindow::dropEvent(QDropEvent *event)
+{
+    QList<QUrl> urls = event->mimeData()->urls();
+    if (urls.isEmpty())
+        return;
+
+    QString filePath = urls.first().toLocalFile();
+    if (QFile::exists(filePath)) {
+        openImage(filePath);  // 打开图片
+    }
+
+    event->acceptProposedAction();
+}
+
