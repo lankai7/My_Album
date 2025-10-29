@@ -40,7 +40,7 @@ QPushButton:pressed {
 }</string>
      </property>
      <property name="text">
-      <string>打开文件夹</string>
+      <string>所在文件夹</string>
      </property>
     </widget>
    </item>

@@ -126,7 +126,6 @@ void AlbumWindow::listviewInit()
 {
     // 初始化文件模型
     model = new QFileSystemModel(this);
-    albumPath = QStandardPaths::writableLocation(QStandardPaths::PicturesLocation) + "/MyAlbum"; // 初始文件夹
     model->setRootPath(albumPath);
 
     // 只显示图片和视频文件
@@ -158,15 +157,14 @@ void AlbumWindow::albumInit()
     // Windows: C:/Users/用户名/Pictures
     // macOS:   ~/Pictures
     // Linux:   ~/图片 或 ~/Pictures
-    QString picturesPath = QStandardPaths::writableLocation(QStandardPaths::PicturesLocation);
+    QString picturesPath = QStandardPaths::writableLocation(QStandardPaths::PicturesLocation) + "/MyAlbum";
 
     // 在系统图片目录下创建 Album 文件夹
-    QString albumPath = picturesPath + "/MyAlbum";
-    QDir dir(albumPath);
+    QDir dir(picturesPath);
 
     // 如果目录不存在则创建
     if (!dir.exists()) {
-        if (QDir().mkpath(albumPath)) {
+        if (QDir().mkpath(picturesPath)) {
             qDebug() << "Album 文件夹已创建:" << albumPath;
         } else {
             qDebug() << "创建 Album 文件夹失败:" << albumPath;
@@ -176,8 +174,10 @@ void AlbumWindow::albumInit()
 
     // 如果未初始化，复制资源图片并记录状态
     if (!initialized) {
-        //第一次运行：复制 Help.png 到系统图片文件夹
-        copyResourceImage(albumPath);
+        //第一次运行
+        albumPath = QStandardPaths::writableLocation(QStandardPaths::PicturesLocation) + "/MyAlbum";
+        //复制 Help.png 到系统图片文件夹
+        copyResourceImage(picturesPath);
         //注册注册表
         registerAsImageViewer();
         // 保存标志
@@ -187,6 +187,8 @@ void AlbumWindow::albumInit()
 
         qDebug() << "初始化完成，写入 QSettings。";
     } else {
+        //非第一次运行
+        albumPath = QStandardPaths::writableLocation(QStandardPaths::PicturesLocation);
         qDebug() << "检测到初始化标志，不再复制 Help.png。";
     }
 }
