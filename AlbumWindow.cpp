@@ -257,7 +257,8 @@ void AlbumWindow::WindowInit()
     ui->label_create_image->setToolTip("创建时间");
     ui->label_modified_image->setToolTip("修改时间");
     ui->label_size_image->setToolTip("文件大小");
-
+    //初始化窗口化图标
+    setWindowsTypeIcon();
 }
 
 
@@ -534,13 +535,17 @@ void AlbumWindow::on_off_btn_clicked()
 void AlbumWindow::changeEvent(QEvent *event)
 {
     if (event->type() == QEvent::WindowStateChange) {
+        setWindowsTypeIcon();
+    }
+    QMainWindow::changeEvent(event);
+}
+
+void AlbumWindow::setWindowsTypeIcon(){
         if (this->isMaximized()) {
             ui->win_btn->setIcon(QIcon(":/new/res/window.png"));
         } else {
             ui->win_btn->setIcon(QIcon(":/new/res/maxWin.png"));
         }
-    }
-    QMainWindow::changeEvent(event);
 }
 
 

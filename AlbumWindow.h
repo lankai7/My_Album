@@ -74,6 +74,8 @@ private:
     void copyResourceImage(const QString &albumPath);
     //检测是否为图片文件
     bool isImageFile(const QFileInfo &fileInfo);
+    //设置窗口化图标
+    void setWindowsTypeIcon();
 private slots:
     //上一张图片
     void onPrevClicked();
