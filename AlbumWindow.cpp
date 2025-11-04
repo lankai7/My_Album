@@ -20,7 +20,7 @@
 #include <shlobj.h>
 #include <QMimeData>
 #include "ImageView.h"
-
+#include "ButtonContainer.h"
 
 AlbumWindow::AlbumWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -73,11 +73,40 @@ void AlbumWindow::connectInit()
             this, &AlbumWindow::onListViewContextMenu);
     connect(ui->listView->selectionModel(), &QItemSelectionModel::currentChanged,   //图片的改变->信息栏的改变
             this, &AlbumWindow::pix_info_init);
-    connect(ui->graphicsView, &ImageView::imageDropped, this, [=](const QString &path){
+    connect(ui->graphicsView, &ImageView::imageDropped, this, [=](const QString &path){ //拖入图片打开
         qDebug() << "拖入的图片路径:" << path;
         openImage(path);
     });
-    connect(ui->amplify_btn, &QPushButton::clicked, ui->graphicsView, &ImageView::toggleFullscreen);
+    connect(ui->amplify_btn, &QPushButton::clicked, ui->graphicsView, [this](){ //图片全屏
+        // 检查是否有图片
+        if (!ui->graphicsView->scene() || ui->graphicsView->scene()->items().isEmpty()) {
+            TipLabel::showTip(this, "❌没有打开图片！");
+            return; // 没有图片时直接返回
+        }
+        ui->graphicsView->toggleFullscreen();
+    });
+    //*****************悬浮框的显示与隐藏*****************
+    connect(m_prevHideTimer, &QTimer::timeout, this, [this]() {
+        ui->prevButton->setVisible(false);
+    });
+    connect(m_nextHideTimer, &QTimer::timeout, this, [this]() {
+        ui->nextButton->setVisible(false);
+    });
+    connect(m_toolbarHideTimer, &QTimer::timeout, this, [this]() {
+        ui->buttonContainer->setVisible(false);
+    });
+    // 监听视图的离开信号（鼠标离开图像区域）
+    connect(ui->graphicsView, &ImageView::mouseLeave, this, [this]() {
+        m_prevHideTimer->start(400);
+        m_nextHideTimer->start(400);
+    });
+    connect(ui->buttonContainer, &ButtonContainer::mouseMove, this, [this]() {
+        m_toolbarHideTimer->stop();
+    });
+    connect(ui->buttonContainer, &ButtonContainer::mouseLeave, this, [this]() {
+        m_toolbarHideTimer->start(400);
+    });
+    //**************************************************
 }
 
 void AlbumWindow::onListViewContextMenu(const QPoint &pos)
@@ -259,6 +288,15 @@ void AlbumWindow::WindowInit()
     ui->label_size_image->setToolTip("文件大小");
     //初始化窗口化图标
     setWindowsTypeIcon();
+    // 初始化延迟隐藏定时器
+    m_hideTimer = new QTimer(this);
+    m_hideTimer->setSingleShot(true);
+    m_prevHideTimer = new QTimer(this);
+    m_prevHideTimer->setSingleShot(true);
+    m_nextHideTimer = new QTimer(this);
+    m_nextHideTimer->setSingleShot(true);
+    m_toolbarHideTimer = new QTimer(this);
+    m_toolbarHideTimer->setSingleShot(true);
 }
 
 
@@ -687,20 +725,27 @@ void AlbumWindow::onImageViewMouseMoved(const QPoint &pos)
 {
     // 检查鼠标是否靠近左按钮或右按钮
     int showDistance = 220; // 鼠标靠近 就显示
-    if (pos.x() <= showDistance)
-        ui->prevButton->setVisible(true);
-    else
-        ui->prevButton->setVisible(false);
+    if (pos.x() <= showDistance){
 
-    if (pos.x() >= ui->graphicsView->width() - showDistance)
+        ui->prevButton->setVisible(true);
+        m_prevHideTimer->stop();
+    }
+    else
+        m_prevHideTimer->start(400);
+
+    if (pos.x() >= ui->graphicsView->width() - showDistance){
         ui->nextButton->setVisible(true);
+        m_nextHideTimer->stop();
+    }
     else
-        ui->nextButton->setVisible(false);
-    //检查鼠标是否接近工具栏
-    if (pos.y() >= ui->graphicsView->height() - showDistance)
+        m_nextHideTimer->start(400);
+
+    if (pos.y() >= ui->graphicsView->height() - showDistance){
         ui->buttonContainer->setVisible(true);
+        m_toolbarHideTimer->stop();
+    }
     else
-        ui->buttonContainer->setVisible(false);
+        m_toolbarHideTimer->start(400);
 }
 //=======================================================================
 
@@ -721,6 +766,11 @@ void AlbumWindow::on_turn_right_clicked()
 
 void AlbumWindow::on_info_btn_clicked()
 {
+    // 检查是否有图片
+    if (!ui->graphicsView->scene() || ui->graphicsView->scene()->items().isEmpty()) {
+        TipLabel::showTip(this, "❌没有打开图片！");
+        return; // 没有图片时直接返回
+    }
     if (ui->info_widget->isVisible()){
         ui->info_widget->setVisible(false);
     }
@@ -1054,3 +1104,4 @@ void AlbumWindow::dropEvent(QDropEvent *event)
 
     event->acceptProposedAction();
 }
+

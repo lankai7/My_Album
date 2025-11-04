@@ -15,6 +15,7 @@
 #include <QVideoWidget>
 #include <QGraphicsProxyWidget>
 
+
 QT_BEGIN_NAMESPACE
 namespace Ui { class AlbumWindow; }
 QT_END_NAMESPACE
@@ -48,6 +49,10 @@ private:
     bool isLeft;
     QMediaPlayer *player = nullptr;
     QGraphicsVideoItem *videoItem = nullptr;
+    QTimer *m_hideTimer;
+    QTimer *m_prevHideTimer;
+    QTimer *m_nextHideTimer;
+    QTimer *m_toolbarHideTimer;
 
     //connect 初始化
     void connectInit();

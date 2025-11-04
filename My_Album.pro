@@ -13,6 +13,7 @@ win32:LIBS += -user32
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    ButtonContainer.cpp \
     ImageView.cpp \
     MyListViewMenu.cpp \
     ShowImageInfo.cpp \
@@ -23,6 +24,7 @@ SOURCES += \
 
 HEADERS += \
     AlbumWindow.h \
+    ButtonContainer.h \
     ImageView.h \
     MyListViewMenu.h \
     ShowImageInfo.h \

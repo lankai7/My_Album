@@ -1268,7 +1268,7 @@ QPushButton:pressed {
      <layout class="QHBoxLayout" name="horizontalLayout"/>
     </item>
     <item>
-     <widget class="QWidget" name="buttonContainer" native="true">
+     <widget class="ButtonContainer" name="buttonContainer" native="true">
       <property name="minimumSize">
        <size>
         <width>0</width>
@@ -1282,14 +1282,23 @@ QPushButton:pressed {
        </size>
       </property>
       <property name="styleSheet">
-       <string notr="true">QWidget#buttonContainer {
-    background-color: rgba(80, 80, 80, 200); /* 半透明深灰，保证按钮icon清晰 */
-    border-radius: 10px;                     /* 圆角 */
-    border: 1px solid rgba(120, 120, 120, 180); /* 低调灰色边框 */
-    padding: 6px;                             /* 内边距 */
+       <string notr="true">QPushButton {
+    background-color: rgba(90, 90, 90, 220); /* 深灰半透明 */
+    border-radius: 6px;                     /* 圆角 */
+    border: 1px solid rgba(100, 100, 100, 180); /* 柔和灰色边框 */
+    padding: 4px;                            /* 内边距 */
 }
 
-</string>
+/* 鼠标悬停效果 */
+QPushButton:hover {
+    background-color: rgba(120, 120, 120, 220); /* 鼠标悬停稍亮 */
+}
+
+/* 鼠标按下效果 */
+QPushButton:pressed {
+    background-color: rgba(150, 150, 150, 220); /* 按下更亮 */
+    border: 1px solid rgba(150, 150, 150, 200);
+}</string>
       </property>
       <layout class="QHBoxLayout" name="horizontalLayout_5">
        <item>
@@ -1323,23 +1332,7 @@ QPushButton:pressed {
           <cursorShape>PointingHandCursor</cursorShape>
          </property>
          <property name="styleSheet">
-          <string notr="true">QPushButton {
-    background-color: rgba(60, 60, 60, 220); /* 深灰半透明 */
-    border-radius: 6px;                     /* 圆角 */
-    border: 1px solid rgba(100, 100, 100, 180); /* 柔和灰色边框 */
-    padding: 4px;                            /* 内边距 */
-}
-
-/* 鼠标悬停效果 */
-QPushButton:hover {
-    background-color: rgba(90, 90, 90, 220); /* 鼠标悬停稍亮 */
-}
-
-/* 鼠标按下效果 */
-QPushButton:pressed {
-    background-color: rgba(120, 120, 120, 220); /* 按下更亮 */
-    border: 1px solid rgba(150, 150, 150, 200);
-}</string>
+          <string notr="true"/>
          </property>
          <property name="text">
           <string/>
@@ -1374,23 +1367,7 @@ QPushButton:pressed {
           <cursorShape>PointingHandCursor</cursorShape>
          </property>
          <property name="styleSheet">
-          <string notr="true">QPushButton {
-    background-color: rgba(60, 60, 60, 220); /* 深灰半透明 */
-    border-radius: 6px;                     /* 圆角 */
-    border: 1px solid rgba(100, 100, 100, 180); /* 柔和灰色边框 */
-    padding: 4px;                            /* 内边距 */
-}
-
-/* 鼠标悬停效果 */
-QPushButton:hover {
-    background-color: rgba(90, 90, 90, 220); /* 鼠标悬停稍亮 */
-}
-
-/* 鼠标按下效果 */
-QPushButton:pressed {
-    background-color: rgba(120, 120, 120, 220); /* 按下更亮 */
-    border: 1px solid rgba(150, 150, 150, 200);
-}</string>
+          <string notr="true"/>
          </property>
          <property name="text">
           <string/>
@@ -1428,23 +1405,7 @@ QPushButton:pressed {
           <cursorShape>PointingHandCursor</cursorShape>
          </property>
          <property name="styleSheet">
-          <string notr="true">QPushButton {
-    background-color: rgba(60, 60, 60, 220); /* 深灰半透明 */
-    border-radius: 6px;                     /* 圆角 */
-    border: 1px solid rgba(100, 100, 100, 180); /* 柔和灰色边框 */
-    padding: 4px;                            /* 内边距 */
-}
-
-/* 鼠标悬停效果 */
-QPushButton:hover {
-    background-color: rgba(90, 90, 90, 220); /* 鼠标悬停稍亮 */
-}
-
-/* 鼠标按下效果 */
-QPushButton:pressed {
-    background-color: rgba(120, 120, 120, 220); /* 按下更亮 */
-    border: 1px solid rgba(150, 150, 150, 200);
-}</string>
+          <string notr="true"/>
          </property>
          <property name="text">
           <string/>
@@ -1473,23 +1434,7 @@ QPushButton:pressed {
           <cursorShape>PointingHandCursor</cursorShape>
          </property>
          <property name="styleSheet">
-          <string notr="true">QPushButton {
-    background-color: rgba(60, 60, 60, 220); /* 深灰半透明 */
-    border-radius: 6px;                     /* 圆角 */
-    border: 1px solid rgba(100, 100, 100, 180); /* 柔和灰色边框 */
-    padding: 4px;                            /* 内边距 */
-}
-
-/* 鼠标悬停效果 */
-QPushButton:hover {
-    background-color: rgba(90, 90, 90, 220); /* 鼠标悬停稍亮 */
-}
-
-/* 鼠标按下效果 */
-QPushButton:pressed {
-    background-color: rgba(120, 120, 120, 220); /* 按下更亮 */
-    border: 1px solid rgba(150, 150, 150, 200);
-}</string>
+          <string notr="true"/>
          </property>
          <property name="text">
           <string/>
@@ -1602,6 +1547,12 @@ border-radius: 20px; </string>
    <class>ImageView</class>
    <extends>QGraphicsView</extends>
    <header>imageview.h</header>
+  </customwidget>
+  <customwidget>
+   <class>ButtonContainer</class>
+   <extends>QWidget</extends>
+   <header>ButtonContainer.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources>

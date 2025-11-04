@@ -18,6 +18,8 @@ public:
     void enterFullscreen();
     void exitFullscreen();
     bool isFullscreen() const;
+    void leaveEvent(QEvent *event)override;
+
 protected:
     void wheelEvent(QWheelEvent *event) override;
     //双击事件
@@ -32,9 +34,11 @@ signals:
     void imageDropped(const QString &filePath);
     //全屏
     void fullscreenChanged(bool isFullscreen);
+    // 鼠标离开视图信号
+    void mouseLeave();
 
 public slots:
-    //全屏信号
+    //全屏
     void toggleFullscreen();
 
 private:

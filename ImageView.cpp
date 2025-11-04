@@ -6,6 +6,7 @@
 #include <QApplication>
 #include <QMainWindow>
 #include <QScreen>
+#include "TipLabel.h"
 
 
 ImageView::ImageView(QWidget *parent)
@@ -204,3 +205,17 @@ void ImageView::keyPressEvent(QKeyEvent *event)
         QGraphicsView::keyPressEvent(event);
     }
 }
+
+void ImageView::leaveEvent(QEvent *event)
+{
+    QGraphicsView::leaveEvent(event);
+    QWidget *w = QApplication::widgetAt(QCursor::pos());
+    // 如果鼠标还在按钮上，就不要发信号
+    if (w && (w->objectName() == "prevButton" ||
+              w->objectName() == "nextButton" ||
+              w->objectName() == "buttonContainer"))
+        return;
+
+    emit mouseLeave();
+}
+
