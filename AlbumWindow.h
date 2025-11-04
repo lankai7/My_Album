@@ -72,9 +72,8 @@ private:
     void changeEvent(QEvent *event);
     //创建HELP.png
     void copyResourceImage(const QString &albumPath);
-//    //自动更新注册表
-//    void updateRegister();
-
+    //检测是否为图片文件
+    bool isImageFile(const QFileInfo &fileInfo);
 private slots:
     //上一张图片
     void onPrevClicked();

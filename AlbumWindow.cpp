@@ -77,7 +77,7 @@ void AlbumWindow::connectInit()
         qDebug() << "拖入的图片路径:" << path;
         openImage(path);
     });
-
+    connect(ui->amplify_btn, &QPushButton::clicked, ui->graphicsView, &ImageView::toggleFullscreen);
 }
 
 void AlbumWindow::onListViewContextMenu(const QPoint &pos)
@@ -370,26 +370,53 @@ void AlbumWindow::onListViewClicked(const QModelIndex &index)
 
 void AlbumWindow::onPrevClicked()
 {
-    int row = currentIndex.row() - 1;
-    if (row >= 0) {
-        QModelIndex prev = model->index(row, 0, currentIndex.parent());
-        ui->listView->setCurrentIndex(prev);
-        onListViewClicked(prev);
-    } else {
-        TipLabel::showTip(this, "✅已经到达列表顶部！");
+    int currentRow = currentIndex.row();
+
+    // 从当前行的上一行开始向前查找
+    for (int row = currentRow - 1; row >= 0; --row) {
+        QModelIndex index = model->index(row, 0, currentIndex.parent());
+        QFileInfo fileInfo = model->fileInfo(index);
+
+        // 如果是图片文件，不是文件夹
+        if (!fileInfo.isDir() && isImageFile(fileInfo)) {
+            ui->listView->setCurrentIndex(index);
+            onListViewClicked(index);
+            return;
+        }
     }
+
+    // 如果没有找到前一张图片
+    TipLabel::showTip(this, "✅已经到达列表顶部！");
 }
 
 void AlbumWindow::onNextClicked()
 {
-    int row = currentIndex.row() + 1;
-    if (row < model->rowCount(currentIndex.parent())) {
-        QModelIndex next = model->index(row, 0, currentIndex.parent());
-        ui->listView->setCurrentIndex(next);
-        onListViewClicked(next);
-    } else {
-        TipLabel::showTip(this, "✅已经是最后一张了！");
+    int currentRow = currentIndex.row();
+    int totalRows = model->rowCount(currentIndex.parent());
+
+    // 从当前行的下一行开始向后查找
+    for (int row = currentRow + 1; row < totalRows; ++row) {
+        QModelIndex index = model->index(row, 0, currentIndex.parent());
+        QFileInfo fileInfo = model->fileInfo(index);
+
+        // 如果是图片文件，不是文件夹
+        if (!fileInfo.isDir() && isImageFile(fileInfo)) {
+            ui->listView->setCurrentIndex(index);
+            onListViewClicked(index);
+            return;
+        }
     }
+
+    // 如果没有找到下一张图片
+    TipLabel::showTip(this, "✅已经是最后一张了！");
+}
+
+// 添加图片文件判断函数
+bool AlbumWindow::isImageFile(const QFileInfo &fileInfo)
+{
+    QString suffix = fileInfo.suffix().toLower();
+    static QStringList imageFormats = {"jpg", "jpeg", "png", "bmp", "gif", "webp", "svg"};
+    return imageFormats.contains(suffix);
 }
 
 
@@ -1022,4 +1049,3 @@ void AlbumWindow::dropEvent(QDropEvent *event)
 
     event->acceptProposedAction();
 }
-
