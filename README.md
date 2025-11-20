@@ -1,1 +1,1 @@
-![界面帮助](Help.png)
+![帮助说明](./res/Help.png)
